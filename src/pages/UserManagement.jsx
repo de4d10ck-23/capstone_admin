@@ -81,6 +81,9 @@ const UserManagement = () => {
       const method = editingUser ? "PUT" : "POST";
 
       const bodyData = { ...formData };
+      if (bodyData.role !== "resident" && bodyData.role !== "barangay_official") {
+        bodyData.barangay = null;
+      }
       if (editingUser && !bodyData.password) {
         delete bodyData.password;
       }
@@ -349,12 +352,21 @@ const UserManagement = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              {/* Role Selection & Conditional Barangay */}
+              <div className={`grid ${formData.role === "resident" || formData.role === "barangay_official" ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1"} gap-4`}>
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">System Role</label>
                   <select
                     value={formData.role}
-                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                    onChange={(e) => {
+                      const newRole = e.target.value;
+                      const needsBrgy = newRole === "resident" || newRole === "barangay_official";
+                      setFormData({ 
+                        ...formData, 
+                        role: newRole,
+                        barangay: needsBrgy ? (formData.barangay || "Combado") : ""
+                      });
+                    }}
                     className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-600"
                   >
                     <option value="admin">Administrator</option>
@@ -365,19 +377,23 @@ const UserManagement = () => {
                   </select>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">Barangay</label>
-                  <select
-                    value={formData.barangay}
-                    onChange={(e) => setFormData({ ...formData, barangay: e.target.value })}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-600"
-                  >
-                    <option value="">None (City-wide)</option>
-                    {barangays.map((b) => (
-                      <option key={b} value={b}>{b}</option>
-                    ))}
-                  </select>
-                </div>
+                {(formData.role === "resident" || formData.role === "barangay_official") && (
+                  <div className="animate-fade-in">
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
+                      Assigned Barangay <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      value={formData.barangay}
+                      onChange={(e) => setFormData({ ...formData, barangay: e.target.value })}
+                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-600"
+                      required
+                    >
+                      {barangays.map((b) => (
+                        <option key={b} value={b}>{b}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
               </div>
 
               <div>
