@@ -208,44 +208,44 @@ const WaterMap = () => {
   }, [locations, showMarkers]);
 
   return (
-    <div className="h-[calc(100vh-140px)] flex flex-col relative rounded-3xl overflow-hidden border border-slate-200/80 shadow-sm font-sans">
+    <div className="h-[calc(100vh-110px)] sm:h-[calc(100vh-140px)] flex flex-col relative rounded-2xl sm:rounded-3xl overflow-hidden border border-slate-200/80 shadow-sm font-sans">
       {/* Top Map Controls Bar */}
-      <div className="bg-white p-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-4 z-10 shadow-sm">
-        <div className="flex items-center gap-3">
-          <h2 className="font-bold text-sm text-slate-900">Surveillance Map & Risk Heatmap</h2>
+      <div className="bg-white p-3 sm:p-4 border-b border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 sm:gap-4 z-10 shadow-sm">
+        <div className="flex items-center justify-between w-full sm:w-auto gap-3">
+          <h2 className="font-bold text-xs sm:text-sm text-slate-900 truncate">Surveillance Map & Risk Heatmap</h2>
           <button
             onClick={fetchData}
-            className="p-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors"
+            className="p-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors flex-shrink-0"
             title="Refresh Map Data"
           >
             <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
           </button>
         </div>
 
-        <div className="flex items-center gap-3 text-xs">
+        <div className="flex flex-wrap items-center gap-2 text-xs w-full sm:w-auto">
           {/* Layer Toggles */}
           <button
             onClick={() => setShowHeatmap(!showHeatmap)}
-            className={`px-3 py-1.5 rounded-full font-semibold border flex items-center gap-1.5 transition-all ${
+            className={`px-2.5 sm:px-3 py-1.5 rounded-full font-semibold border flex items-center gap-1.5 text-[11px] sm:text-xs transition-all cursor-pointer ${
               showHeatmap
                 ? "bg-blue-50 text-blue-700 border-blue-200 shadow-sm"
                 : "bg-white text-slate-500 border-slate-200"
             }`}
           >
-            {showHeatmap ? <Eye size={14} /> : <EyeOff size={14} />}
-            <span>Household Risk Heatmap</span>
+            {showHeatmap ? <Eye size={13} /> : <EyeOff size={13} />}
+            <span>Risk Heatmap</span>
           </button>
 
           <button
             onClick={() => setShowMarkers(!showMarkers)}
-            className={`px-3 py-1.5 rounded-full font-semibold border flex items-center gap-1.5 transition-all ${
+            className={`px-2.5 sm:px-3 py-1.5 rounded-full font-semibold border flex items-center gap-1.5 text-[11px] sm:text-xs transition-all cursor-pointer ${
               showMarkers
                 ? "bg-blue-50 text-blue-700 border-blue-200 shadow-sm"
                 : "bg-white text-slate-500 border-slate-200"
             }`}
           >
-            {showMarkers ? <Eye size={14} /> : <EyeOff size={14} />}
-            <span>Water Station Pins ({locations.length})</span>
+            {showMarkers ? <Eye size={13} /> : <EyeOff size={13} />}
+            <span>Pins ({locations.length})</span>
           </button>
         </div>
       </div>
@@ -255,13 +255,13 @@ const WaterMap = () => {
         <div ref={mapContainer} className="w-full h-full" />
 
         {/* Map Style Selector Overlay */}
-        <div className="absolute top-4 left-4 z-10 bg-white/95 backdrop-blur-md px-2 py-1.5 rounded-2xl shadow-lg border border-slate-200/80 flex items-center gap-1 text-xs font-sans">
+        <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-10 bg-white/95 backdrop-blur-md px-2 py-1.5 rounded-2xl shadow-lg border border-slate-200/80 flex items-center gap-1 text-[11px] sm:text-xs font-sans">
           <div className="px-1 text-slate-700">
-            <Layers size={16} />
+            <Layers size={15} />
           </div>
           <button
             onClick={() => setMapStyle("mapbox://styles/mapbox/streets-v12")}
-            className={`px-3 py-1.5 rounded-xl font-semibold transition-all cursor-pointer ${
+            className={`px-2.5 sm:px-3 py-1.5 rounded-xl font-semibold transition-all cursor-pointer ${
               mapStyle === "mapbox://styles/mapbox/streets-v12"
                 ? "bg-[#0f3b82] text-white shadow-sm"
                 : "text-slate-700 hover:text-slate-900 font-medium hover:bg-slate-50"
@@ -271,7 +271,7 @@ const WaterMap = () => {
           </button>
           <button
             onClick={() => setMapStyle("mapbox://styles/mapbox/satellite-streets-v12")}
-            className={`px-3 py-1.5 rounded-xl font-semibold transition-all cursor-pointer ${
+            className={`px-2.5 sm:px-3 py-1.5 rounded-xl font-semibold transition-all cursor-pointer ${
               mapStyle === "mapbox://styles/mapbox/satellite-streets-v12"
                 ? "bg-[#0f3b82] text-white shadow-sm"
                 : "text-slate-700 hover:text-slate-900 font-medium hover:bg-slate-50"
@@ -281,7 +281,7 @@ const WaterMap = () => {
           </button>
           <button
             onClick={() => setMapStyle("mapbox://styles/mapbox/light-v11")}
-            className={`px-3 py-1.5 rounded-xl font-semibold transition-all cursor-pointer ${
+            className={`px-2.5 sm:px-3 py-1.5 rounded-xl font-semibold transition-all cursor-pointer ${
               mapStyle === "mapbox://styles/mapbox/light-v11"
                 ? "bg-[#0f3b82] text-white shadow-sm"
                 : "text-slate-700 hover:text-slate-900 font-medium hover:bg-slate-50"
@@ -292,31 +292,31 @@ const WaterMap = () => {
         </div>
 
         {/* Legend */}
-        <div className="absolute bottom-6 left-6 z-10 bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-slate-200 text-xs space-y-2 max-w-xs">
+        <div className="hidden sm:block absolute bottom-6 left-6 z-10 bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-slate-200 text-xs space-y-2 max-w-xs">
           <p className="font-bold text-slate-900">Spatial Risk Legend</p>
           <div className="space-y-1.5 text-[11px] text-slate-600">
             <div className="flex items-center gap-2">
-              <span className="w-3.5 h-3.5 rounded-full bg-emerald-500"></span>
+              <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 flex-shrink-0"></span>
               <span>Safe Station (&lt;10 MPN / 0 E.Coli)</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="w-3.5 h-3.5 rounded-full bg-amber-500"></span>
+              <span className="w-3.5 h-3.5 rounded-full bg-amber-500 flex-shrink-0"></span>
               <span>Warning Station (Elevated Coliform)</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="w-3.5 h-3.5 rounded-full bg-red-500"></span>
+              <span className="w-3.5 h-3.5 rounded-full bg-red-500 flex-shrink-0"></span>
               <span>Contaminated (E. Coli Positive)</span>
             </div>
             <div className="flex items-center gap-2 pt-1 border-t border-slate-100">
-              <span className="w-3.5 h-3.5 rounded-full bg-gradient-to-r from-yellow-400 to-red-600"></span>
-              <span>Heatmap: High Risk Household Zone</span>
+              <span className="w-3.5 h-3.5 rounded-full bg-gradient-to-r from-yellow-400 to-red-600 flex-shrink-0"></span>
+              <span>Heatmap: High Risk Zone</span>
             </div>
           </div>
         </div>
 
         {/* Selected Station Card */}
         {selectedLocation && (
-          <div className="absolute top-6 right-6 z-10 w-80 bg-white/95 backdrop-blur-2xl rounded-2xl p-5 shadow-2xl border border-slate-100 animate-fade-in">
+          <div className="absolute bottom-4 left-4 right-4 sm:top-6 sm:right-6 sm:bottom-auto sm:left-auto sm:w-80 z-20 bg-white/95 backdrop-blur-2xl rounded-3xl p-5 shadow-2xl border border-slate-100 animate-fade-in">
             <div className="flex items-start justify-between pb-3 border-b border-slate-100">
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600">Selected Station</span>
@@ -346,7 +346,7 @@ const WaterMap = () => {
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">Coordinates:</span>
-                <span className="font-mono text-slate-600">
+                <span className="font-mono text-slate-600 text-[11px]">
                   {selectedLocation.latitude?.toFixed(5)}, {selectedLocation.longitude?.toFixed(5)}
                 </span>
               </div>
