@@ -7,11 +7,7 @@ import Layout from './components/Layout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import UserManagement from './pages/UserManagement';
-import WaterSources from './pages/WaterSources';
 import WaterMap from './pages/WaterMap';
-import Analytics from './pages/Analytics';
-import Reports from './pages/Reports';
-import Notifications from './pages/Notifications';
 import ForecastConfig from './pages/ForecastConfig';
 
 function App() {
@@ -25,11 +21,7 @@ function App() {
             <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="users" element={<UserManagement />} />
-            <Route path="water-sources" element={<WaterSources />} />
             <Route path="map" element={<WaterMap />} />
-            <Route path="analytics" element={<Analytics />} />
-            <Route path="reports" element={<Reports />} />
-            <Route path="notifications" element={<Notifications />} />
             <Route path="forecast-config" element={<ForecastConfig />} />
           </Route>
           

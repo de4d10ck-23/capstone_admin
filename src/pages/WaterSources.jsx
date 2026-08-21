@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Droplets, Plus, Search, Edit2, Trash2, MapPin, CheckCircle, AlertCircle, X, ShieldCheck, AlertTriangle } from "lucide-react";
+import { MAASIN_BARANGAYS as barangays } from "../constants/barangays";
 
 const WaterSources = () => {
   const { token, API_URL } = useAuth();
@@ -147,12 +148,6 @@ const WaterSources = () => {
     const matchStatus = selectedStatus === "all" || s.status?.toLowerCase() === selectedStatus.toLowerCase();
     return matchQuery && matchBarangay && matchStatus;
   });
-
-  const barangays = [
-    "Combado", "Batuan", "Rizal", "Hantag", "Malapoc Sur", "Malapoc Norte",
-    "Matin-ao", "San Isidro", "Tagnipa", "Abgao", "Asuncion", "Canturing",
-    "Dongon", "Guadalupe", "Ibarra", "Mantahan", "Tunga-tunga"
-  ];
 
   return (
     <div className="space-y-8 animate-fade-in font-sans">

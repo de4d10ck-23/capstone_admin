@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { FileText, Download, Plus, Filter, Calendar, CheckCircle2, AlertCircle, RefreshCw } from "lucide-react";
+import { MAASIN_BARANGAYS as barangays } from "../constants/barangays";
 
 const Reports = () => {
   const { token, API_URL } = useAuth();
@@ -69,11 +70,6 @@ const Reports = () => {
       setGenerating(false);
     }
   };
-
-  const barangays = [
-    "Combado", "Batuan", "Rizal", "Hantag", "Malapoc Sur", "Malapoc Norte",
-    "Matin-ao", "San Isidro", "Tagnipa", "Abgao"
-  ];
 
   return (
     <div className="space-y-8 animate-fade-in font-sans">

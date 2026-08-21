@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Bell, Send, CheckCircle2, AlertCircle, Users, Radio, Trash2 } from "lucide-react";
+import { MAASIN_BARANGAYS as barangays } from "../constants/barangays";
 
 const Notifications = () => {
   const { token, API_URL } = useAuth();
@@ -77,11 +78,6 @@ const Notifications = () => {
       setIsSending(false);
     }
   };
-
-  const barangays = [
-    "Combado", "Batuan", "Rizal", "Hantag", "Malapoc Sur", "Malapoc Norte",
-    "Matin-ao", "San Isidro", "Tagnipa", "Abgao", "Asuncion", "Canturing"
-  ];
 
   return (
     <div className="space-y-8 animate-fade-in font-sans">

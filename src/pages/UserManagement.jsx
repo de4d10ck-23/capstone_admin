@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Users, UserPlus, Search, Edit2, Trash2, Shield, CheckCircle, AlertCircle, X } from "lucide-react";
+import { MAASIN_BARANGAYS as barangays } from "../constants/barangays";
 
 const UserManagement = () => {
   const { token, API_URL } = useAuth();
@@ -139,12 +140,6 @@ const UserManagement = () => {
     const matchRole = selectedRole === "all" || u.role === selectedRole;
     return matchQuery && matchRole;
   });
-
-  const barangays = [
-    "Combado", "Batuan", "Rizal", "Hantag", "Malapoc Sur", "Malapoc Norte",
-    "Matin-ao", "San Isidro", "Tagnipa", "Abgao", "Asuncion", "Canturing",
-    "Dongon", "Guadalupe", "Ibarra", "Mantahan", "Tunga-tunga"
-  ];
 
   return (
     <div className="space-y-8 animate-fade-in font-sans">

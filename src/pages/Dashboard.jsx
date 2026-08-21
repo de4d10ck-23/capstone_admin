@@ -59,23 +59,23 @@ const Dashboard = () => {
 
         <div className="flex flex-wrap gap-3">
           <Link
-            to="/water-sources"
+            to="/users"
             className="px-5 py-2.5 rounded-full bg-cyan-400 hover:bg-cyan-300 text-slate-900 font-semibold text-xs transition-all shadow hover:shadow-lg hover:-translate-y-0.5 flex items-center gap-1.5"
           >
-            <Plus size={16} />
-            <span>Add Water Source</span>
-          </Link>
-          <Link
-            to="/users"
-            className="px-5 py-2.5 rounded-full bg-white text-blue-900 font-semibold text-xs transition-all shadow hover:shadow-lg hover:-translate-y-0.5"
-          >
-            Manage Staff
+            <Users size={16} />
+            <span>Manage Users</span>
           </Link>
           <Link
             to="/map"
-            className="px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/30 text-white font-semibold text-xs transition-all"
+            className="px-5 py-2.5 rounded-full bg-white text-blue-900 font-semibold text-xs transition-all shadow hover:shadow-lg hover:-translate-y-0.5"
           >
             Live Map
+          </Link>
+          <Link
+            to="/forecast-config"
+            className="px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/30 text-white font-semibold text-xs transition-all"
+          >
+            Forecast Config
           </Link>
         </div>
       </div>
@@ -193,23 +193,23 @@ const Dashboard = () => {
               </Link>
 
               <Link
-                to="/analytics"
+                to="/map"
                 className="p-3.5 rounded-2xl bg-slate-50 hover:bg-blue-50 border border-slate-100 flex items-center justify-between transition-colors group"
               >
                 <div className="flex items-center gap-3">
-                  <Activity size={16} className="text-emerald-600" />
-                  <span className="font-semibold text-slate-800 group-hover:text-blue-900">Spatial Analytics</span>
+                  <MapPin size={16} className="text-emerald-600" />
+                  <span className="font-semibold text-slate-800 group-hover:text-blue-900">Live Surveillance Map</span>
                 </div>
                 <ArrowRight size={14} className="text-slate-400 group-hover:text-blue-600" />
               </Link>
 
               <Link
-                to="/reports"
+                to="/forecast-config"
                 className="p-3.5 rounded-2xl bg-slate-50 hover:bg-blue-50 border border-slate-100 flex items-center justify-between transition-colors group"
               >
                 <div className="flex items-center gap-3">
-                  <FileText size={16} className="text-cyan-600" />
-                  <span className="font-semibold text-slate-800 group-hover:text-blue-900">Compliance Reports</span>
+                  <Activity size={16} className="text-cyan-600" />
+                  <span className="font-semibold text-slate-800 group-hover:text-blue-900">ML Forecast Engine</span>
                 </div>
                 <ArrowRight size={14} className="text-slate-400 group-hover:text-blue-600" />
               </Link>

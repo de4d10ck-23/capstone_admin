@@ -4,11 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { 
   LayoutDashboard, 
   Users, 
-  Droplets, 
   Map, 
-  BarChart2, 
-  FileText, 
-  Bell, 
   Settings, 
   LogOut,
   Shield,
@@ -23,11 +19,7 @@ const Layout = () => {
   const navItems = [
     { to: "/dashboard", icon: <LayoutDashboard size={20} />, label: "Dashboard" },
     { to: "/users", icon: <Users size={20} />, label: "User Management" },
-    { to: "/water-sources", icon: <Droplets size={20} />, label: "Water Sources" },
     { to: "/map", icon: <Map size={20} />, label: "Live Map" },
-    { to: "/analytics", icon: <BarChart2 size={20} />, label: "Analytics" },
-    { to: "/reports", icon: <FileText size={20} />, label: "Reports" },
-    { to: "/notifications", icon: <Bell size={20} />, label: "Notifications" },
     { to: "/forecast-config", icon: <Settings size={20} />, label: "Forecast Config" },
   ];
 
