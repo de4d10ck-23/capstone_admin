@@ -7,7 +7,6 @@ import Layout from './components/Layout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import UserManagement from './pages/UserManagement';
-import WaterMap from './pages/WaterMap';
 import ForecastConfig from './pages/ForecastConfig';
 
 function App() {
@@ -21,7 +20,6 @@ function App() {
             <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="users" element={<UserManagement />} />
-            <Route path="map" element={<WaterMap />} />
             <Route path="forecast-config" element={<ForecastConfig />} />
           </Route>
           

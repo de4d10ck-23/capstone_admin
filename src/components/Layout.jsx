@@ -4,12 +4,11 @@ import { useAuth } from '../context/AuthContext';
 import { 
   LayoutDashboard, 
   Users, 
-  Map, 
   Settings, 
-  LogOut,
-  Shield,
-  Menu,
-  X
+  LogOut, 
+  Shield, 
+  Menu, 
+  X 
 } from 'lucide-react';
 
 const Layout = () => {
@@ -19,7 +18,6 @@ const Layout = () => {
   const navItems = [
     { to: "/dashboard", icon: <LayoutDashboard size={20} />, label: "Dashboard" },
     { to: "/users", icon: <Users size={20} />, label: "User Management" },
-    { to: "/map", icon: <Map size={20} />, label: "Live Map" },
     { to: "/forecast-config", icon: <Settings size={20} />, label: "Forecast Config" },
   ];
 

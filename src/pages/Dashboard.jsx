@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import { Droplets, ShieldCheck, AlertTriangle, Users, MapPin, Plus, ArrowRight, Activity, FileText } from "lucide-react";
+import { Droplets, ShieldCheck, AlertTriangle, Users, ArrowRight, Activity } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Dashboard = () => {
@@ -64,12 +64,6 @@ const Dashboard = () => {
           >
             <Users size={16} />
             <span>Manage Users</span>
-          </Link>
-          <Link
-            to="/map"
-            className="px-5 py-2.5 rounded-full bg-white text-blue-900 font-semibold text-xs transition-all shadow hover:shadow-lg hover:-translate-y-0.5"
-          >
-            Live Map
           </Link>
           <Link
             to="/forecast-config"
@@ -188,17 +182,6 @@ const Dashboard = () => {
                 <div className="flex items-center gap-3">
                   <Users size={16} className="text-blue-600" />
                   <span className="font-semibold text-slate-800 group-hover:text-blue-900">User Management</span>
-                </div>
-                <ArrowRight size={14} className="text-slate-400 group-hover:text-blue-600" />
-              </Link>
-
-              <Link
-                to="/map"
-                className="p-3.5 rounded-2xl bg-slate-50 hover:bg-blue-50 border border-slate-100 flex items-center justify-between transition-colors group"
-              >
-                <div className="flex items-center gap-3">
-                  <MapPin size={16} className="text-emerald-600" />
-                  <span className="font-semibold text-slate-800 group-hover:text-blue-900">Live Surveillance Map</span>
                 </div>
                 <ArrowRight size={14} className="text-slate-400 group-hover:text-blue-600" />
               </Link>
