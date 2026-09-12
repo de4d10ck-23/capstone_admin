@@ -98,6 +98,7 @@ const WaterSources = () => {
         coliform_count: parseInt(formData.coliform_count) || 0
       };
 
+
       const res = await fetch(url, {
         method,
         headers: {
@@ -267,6 +268,7 @@ const WaterSources = () => {
                       <td className="py-4 px-6 font-mono text-slate-700">{s.coliform_count ?? 0} MPN</td>
                       <td className="py-4 px-6 font-mono text-slate-700">{s.e_coli_count ?? 0} CFU</td>
                       <td className="py-4 px-6 text-right">
+
                         <div className="inline-flex items-center gap-2">
                           <button
                             onClick={() => handleOpenModal(s)}
@@ -378,7 +380,9 @@ const WaterSources = () => {
                 </div>
               </div>
 
+
               <div className="grid grid-cols-3 gap-4">
+
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">Status</label>
                   <select
