@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import { Droplets, Plus, Search, Edit2, Trash2, MapPin, CheckCircle, AlertCircle, X, ShieldCheck, AlertTriangle } from "lucide-react";
+import { Droplets, Plus, Search, Edit2, Trash2, MapPin, CheckCircle, AlertCircle, X, ShieldCheck, AlertTriangle, Calendar, Clock } from "lucide-react";
 import { MAASIN_BARANGAYS as barangays } from "../constants/barangays";
 
 const WaterSources = () => {
@@ -23,6 +23,8 @@ const WaterSources = () => {
     status: "safe",
     e_coli_count: 0,
     coliform_count: 0,
+    sample_date: "",
+    sample_time: "",
     description: ""
   });
 
@@ -62,6 +64,8 @@ const WaterSources = () => {
         status: sourceToEdit.status || "safe",
         e_coli_count: sourceToEdit.e_coli_count ?? 0,
         coliform_count: sourceToEdit.coliform_count ?? 0,
+        sample_date: sourceToEdit.sample_date || "",
+        sample_time: sourceToEdit.sample_time || "",
         description: sourceToEdit.description || ""
       });
     } else {
@@ -75,6 +79,8 @@ const WaterSources = () => {
         status: "safe",
         e_coli_count: 0,
         coliform_count: 0,
+        sample_date: "",
+        sample_time: "",
         description: ""
       });
     }
@@ -236,17 +242,18 @@ const WaterSources = () => {
                 <th className="py-3.5 px-6">Safety Status</th>
                 <th className="py-3.5 px-6">Coliform</th>
                 <th className="py-3.5 px-6">E. Coli</th>
+                <th className="py-3.5 px-6">Sample Date & Time</th>
                 <th className="py-3.5 px-6 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  <td colSpan="7" className="text-center py-10 text-slate-400">Loading water sources...</td>
+                  <td colSpan="8" className="text-center py-10 text-slate-400">Loading water sources...</td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="text-center py-10 text-slate-400">No water sources found.</td>
+                  <td colSpan="8" className="text-center py-10 text-slate-400">No water sources found.</td>
                 </tr>
               ) : (
                 filtered.map((s) => {
@@ -267,6 +274,18 @@ const WaterSources = () => {
                       </td>
                       <td className="py-4 px-6 font-mono text-slate-700">{s.coliform_count ?? 0} MPN</td>
                       <td className="py-4 px-6 font-mono text-slate-700">{s.e_coli_count ?? 0} CFU</td>
+                      <td className="py-4 px-6 text-slate-700 font-medium">
+                        <div className="flex items-center gap-1.5 font-mono text-[11px] text-slate-800">
+                          <Calendar size={13} className="text-slate-400" />
+                          <span>{s.sample_date || "—"}</span>
+                        </div>
+                        {s.sample_time && (
+                          <div className="flex items-center gap-1.5 text-slate-500 text-[10px] font-mono mt-0.5">
+                            <Clock size={11} className="text-slate-400" />
+                            <span>{s.sample_time}</span>
+                          </div>
+                        )}
+                      </td>
                       <td className="py-4 px-6 text-right">
 
                         <div className="inline-flex items-center gap-2">
@@ -414,6 +433,28 @@ const WaterSources = () => {
                     value={formData.e_coli_count}
                     onChange={(e) => setFormData({ ...formData, e_coli_count: e.target.value })}
                     placeholder="0"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-600"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">Sample / Test Date</label>
+                  <input
+                    type="date"
+                    value={formData.sample_date}
+                    onChange={(e) => setFormData({ ...formData, sample_date: e.target.value })}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-600"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">Sample / Test Time</label>
+                  <input
+                    type="time"
+                    step="1"
+                    value={formData.sample_time}
+                    onChange={(e) => setFormData({ ...formData, sample_time: e.target.value })}
                     className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-600"
                   />
                 </div>
