@@ -6,7 +6,6 @@ import {
   CheckCircle2,
   AlertCircle,
   Cpu,
-  Sliders,
   RefreshCw,
   BarChart3,
   Activity,
@@ -173,7 +172,7 @@ const ForecastConfig = () => {
 
       const data = await res.json();
       if (data.success) {
-        setSuccessMsg("Risk thresholds and ML weights saved! Real-time alerts will use these boundaries.");
+        setSuccessMsg("Risk thresholds successfully saved! Real-time alerts will use these boundaries.");
       } else {
         setErrorMsg(data.detail || "Failed to update configuration.");
       }
@@ -259,7 +258,7 @@ const ForecastConfig = () => {
             </span>
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            Tune probability cutoffs for public health warning tiers, calibrate environmental weights, and retrain the predictive engine.
+            Tune probability cutoffs for public health warning tiers, inspect cross-validation metrics, and retrain the predictive engine.
           </p>
         </div>
 
@@ -538,89 +537,15 @@ const ForecastConfig = () => {
             </div>
           </div>
 
-          {/* Environmental Weights Breakdown */}
-          <div className="space-y-4 pt-2">
-            <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-              <Sliders size={14} className="text-slate-500" />
-              Environmental & Meteorological Feature Weights
-            </h3>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200/70 space-y-1.5">
-                <div className="flex justify-between text-xs font-semibold text-slate-700">
-                  <span>Rainfall Intensity (24h/48h)</span>
-                  <span className="font-mono text-blue-600">{Math.round((config.rainfall_weight || 0.3) * 100)}%</span>
-                </div>
-                <input
-                  type="range"
-                  min="0.05"
-                  max="0.60"
-                  step="0.05"
-                  value={config.rainfall_weight || 0.30}
-                  onChange={(e) => setConfig({ ...config, rainfall_weight: parseFloat(e.target.value) })}
-                  className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                />
-              </div>
-
-              <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200/70 space-y-1.5">
-                <div className="flex justify-between text-xs font-semibold text-slate-700">
-                  <span>GIS Proximity (Latrines/River)</span>
-                  <span className="font-mono text-blue-600">{Math.round((config.proximity_weight || 0.25) * 100)}%</span>
-                </div>
-                <input
-                  type="range"
-                  min="0.05"
-                  max="0.60"
-                  step="0.05"
-                  value={config.proximity_weight || 0.25}
-                  onChange={(e) => setConfig({ ...config, proximity_weight: parseFloat(e.target.value) })}
-                  className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                />
-              </div>
-
-              <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200/70 space-y-1.5">
-                <div className="flex justify-between text-xs font-semibold text-slate-700">
-                  <span>Air Humidity Influence</span>
-                  <span className="font-mono text-blue-600">{Math.round((config.humidity_weight || 0.15) * 100)}%</span>
-                </div>
-                <input
-                  type="range"
-                  min="0.05"
-                  max="0.40"
-                  step="0.05"
-                  value={config.humidity_weight || 0.15}
-                  onChange={(e) => setConfig({ ...config, humidity_weight: parseFloat(e.target.value) })}
-                  className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                />
-              </div>
-
-              <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200/70 space-y-1.5">
-                <div className="flex justify-between text-xs font-semibold text-slate-700">
-                  <span>Forecast Horizon (Days)</span>
-                  <span className="font-mono text-blue-600">{config.prediction_days || 7} Days</span>
-                </div>
-                <input
-                  type="range"
-                  min="1"
-                  max="14"
-                  step="1"
-                  value={config.prediction_days || 7}
-                  onChange={(e) => setConfig({ ...config, prediction_days: parseInt(e.target.value) || 7 })}
-                  className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                />
-              </div>
-            </div>
-          </div>
-
           {/* Action Bar */}
           <div className="flex justify-end pt-2">
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs transition-all shadow-sm hover:shadow disabled:opacity-60"
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs transition-all shadow-sm hover:shadow disabled:opacity-60 cursor-pointer"
             >
               <Save size={15} />
-              <span>{saving ? "Saving Thresholds..." : "Save ML Configuration"}</span>
+              <span>{saving ? "Saving Thresholds..." : "Save Risk Thresholds"}</span>
             </button>
           </div>
         </form>
