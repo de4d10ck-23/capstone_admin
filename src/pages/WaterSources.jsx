@@ -21,6 +21,7 @@ const WaterSources = () => {
     latitude: 10.1330,
     longitude: 124.8700,
     status: "safe",
+    e_coli_present: false,
     e_coli_count: 0,
     coliform_count: 0,
     sample_date: "",
@@ -54,16 +55,21 @@ const WaterSources = () => {
     setErrorMsg("");
     setSuccessMsg("");
     if (sourceToEdit) {
+      const eColiPresent = Boolean(sourceToEdit.e_coli || (sourceToEdit.e_coli_count && Number(sourceToEdit.e_coli_count) > 0));
       setEditingSource(sourceToEdit);
+      const rawStatus = (sourceToEdit.status || "safe").toLowerCase();
+      const normalizedStatus = rawStatus === "undrinkable" ? "contaminated" : rawStatus;
+
       setFormData({
-        name: sourceToEdit.name,
+        name: sourceToEdit.name || sourceToEdit.full_name || "",
         source_type: sourceToEdit.source_type || "deep_well",
         barangay: sourceToEdit.barangay || "Combado",
         latitude: sourceToEdit.latitude || 10.1330,
         longitude: sourceToEdit.longitude || 124.8700,
-        status: sourceToEdit.status || "safe",
-        e_coli_count: sourceToEdit.e_coli_count ?? 0,
-        coliform_count: sourceToEdit.coliform_count ?? 0,
+        status: normalizedStatus,
+        e_coli_present: eColiPresent,
+        e_coli_count: eColiPresent ? 1 : 0,
+        coliform_count: eColiPresent ? 1 : 0,
         sample_date: sourceToEdit.sample_date || "",
         sample_time: sourceToEdit.sample_time || "",
         description: sourceToEdit.description || ""
@@ -77,6 +83,7 @@ const WaterSources = () => {
         latitude: 10.1330,
         longitude: 124.8700,
         status: "safe",
+        e_coli_present: false,
         e_coli_count: 0,
         coliform_count: 0,
         sample_date: "",
@@ -96,12 +103,21 @@ const WaterSources = () => {
       const url = editingSource ? `${API_URL}/water-locations/${editingSource.id}` : `${API_URL}/water-locations`;
       const method = editingSource ? "PUT" : "POST";
 
+      const isPresent = Boolean(formData.e_coli_present);
+      const isContaminated = formData.status === "contaminated" || formData.status === "undrinkable";
+      const isSafe = formData.status === "safe";
+      const isUnknown = formData.status === "unknown";
+
       const payload = {
         ...formData,
+        status: isContaminated ? "contaminated" : (isUnknown ? "unknown" : (isSafe ? "safe" : "warning")),
         latitude: parseFloat(formData.latitude),
         longitude: parseFloat(formData.longitude),
-        e_coli_count: parseInt(formData.e_coli_count) || 0,
-        coliform_count: parseInt(formData.coliform_count) || 0
+        e_coli: isPresent,
+        e_coli_count: isPresent ? 1 : 0,
+        coliform_count: isPresent ? 1 : 0,
+        coliform_bacteria: isPresent,
+        bacteriological_exam: isPresent || isContaminated ? "failed" : (isUnknown ? "untested" : "passed")
       };
 
 
@@ -152,7 +168,8 @@ const WaterSources = () => {
     const matchQuery = s.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                        s.barangay?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchBarangay = selectedBarangay === "all" || s.barangay === selectedBarangay;
-    const matchStatus = selectedStatus === "all" || s.status?.toLowerCase() === selectedStatus.toLowerCase();
+    const sStat = s.status?.toLowerCase() === "undrinkable" ? "contaminated" : (s.status?.toLowerCase() || "");
+    const matchStatus = selectedStatus === "all" || sStat === selectedStatus.toLowerCase();
     return matchQuery && matchBarangay && matchStatus;
   });
 
@@ -224,7 +241,8 @@ const WaterSources = () => {
               <option value="all">All Statuses</option>
               <option value="safe">Safe Only</option>
               <option value="warning">Warning Level</option>
-              <option value="undrinkable">Contaminated</option>
+              <option value="contaminated">Contaminated</option>
+              <option value="unknown">Unknown</option>
             </select>
           </div>
         </div>
@@ -240,8 +258,6 @@ const WaterSources = () => {
                 <th className="py-3.5 px-6">Barangay</th>
                 <th className="py-3.5 px-6">Source Type</th>
                 <th className="py-3.5 px-6">Safety Status</th>
-                <th className="py-3.5 px-6">Coliform</th>
-                <th className="py-3.5 px-6">E. Coli</th>
                 <th className="py-3.5 px-6">Sample Date & Time</th>
                 <th className="py-3.5 px-6 text-right">Actions</th>
               </tr>
@@ -249,16 +265,27 @@ const WaterSources = () => {
             <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  <td colSpan="8" className="text-center py-10 text-slate-400">Loading water sources...</td>
+                  <td colSpan="6" className="text-center py-10 text-slate-400">Loading water sources...</td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan="8" className="text-center py-10 text-slate-400">No water sources found.</td>
+                  <td colSpan="6" className="text-center py-10 text-slate-400">No water sources found.</td>
                 </tr>
               ) : (
                 filtered.map((s) => {
                   const isSafe = s.status?.toLowerCase() === "safe";
                   const isWarning = s.status?.toLowerCase() === "warning";
+                  const isUnknown = s.status?.toLowerCase() === "unknown";
+                  const isContaminated = s.status?.toLowerCase() === "contaminated" || s.status?.toLowerCase() === "undrinkable";
+                  const displayStatus = isSafe 
+                    ? "Safe" 
+                    : isWarning 
+                    ? "Warning" 
+                    : isContaminated 
+                    ? "Contaminated" 
+                    : isUnknown 
+                    ? "Unknown" 
+                    : (s.status || "Unknown");
 
                   return (
                     <tr key={s.id} className="hover:bg-slate-50/80 transition-colors">
@@ -267,13 +294,17 @@ const WaterSources = () => {
                       <td className="py-4 px-6 text-slate-600 capitalize">{s.source_type?.replace(/_/g, " ") || "Deep Well"}</td>
                       <td className="py-4 px-6">
                         <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                          isSafe ? "bg-emerald-100 text-emerald-800" : isWarning ? "bg-amber-100 text-amber-800" : "bg-red-100 text-red-800"
+                          isSafe 
+                            ? "bg-emerald-100 text-emerald-800" 
+                            : isWarning 
+                            ? "bg-amber-100 text-amber-800" 
+                            : isUnknown
+                            ? "bg-slate-100 text-slate-700 border border-slate-200"
+                            : "bg-red-100 text-red-800"
                         }`}>
-                          {s.status || "Unknown"}
+                          {displayStatus}
                         </span>
                       </td>
-                      <td className="py-4 px-6 font-mono text-slate-700">{s.coliform_count ?? 0} MPN</td>
-                      <td className="py-4 px-6 font-mono text-slate-700">{s.e_coli_count ?? 0} CFU</td>
                       <td className="py-4 px-6 text-slate-700 font-medium">
                         <div className="flex items-center gap-1.5 font-mono text-[11px] text-slate-800">
                           <Calendar size={13} className="text-slate-400" />
@@ -400,41 +431,49 @@ const WaterSources = () => {
               </div>
 
 
-              <div className="grid grid-cols-3 gap-4">
-
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">Status</label>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">Safety Status</label>
                   <select
                     value={formData.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-600"
+                    onChange={(e) => {
+                      const newStatus = e.target.value;
+                      setFormData((prev) => ({
+                        ...prev,
+                        status: newStatus,
+                        e_coli_present: (newStatus === "contaminated" || newStatus === "undrinkable") ? true : (newStatus === "safe" ? false : prev.e_coli_present)
+                      }));
+                    }}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-600 font-medium"
                   >
                     <option value="safe">Safe (Drinkable)</option>
                     <option value="warning">Warning Level</option>
-                    <option value="undrinkable">Contaminated</option>
+                    <option value="contaminated">Contaminated</option>
+                    <option value="unknown">Unknown</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">Coliform Count</label>
-                  <input
-                    type="number"
-                    value={formData.coliform_count}
-                    onChange={(e) => setFormData({ ...formData, coliform_count: e.target.value })}
-                    placeholder="0"
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-600"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">E. Coli Count</label>
-                  <input
-                    type="number"
-                    value={formData.e_coli_count}
-                    onChange={(e) => setFormData({ ...formData, e_coli_count: e.target.value })}
-                    placeholder="0"
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-600"
-                  />
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
+                    E. Coli Presence
+                  </label>
+                  <select
+                    value={formData.e_coli_present ? "present" : "not_present"}
+                    onChange={(e) => {
+                        const isPresent = e.target.value === "present";
+                        setFormData((prev) => ({
+                          ...prev,
+                          e_coli_present: isPresent,
+                          e_coli_count: isPresent ? 1 : 0,
+                          coliform_count: isPresent ? 1 : 0,
+                          status: isPresent && prev.status === "safe" ? "contaminated" : prev.status
+                        }));
+                    }}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-600 font-medium"
+                  >
+                    <option value="not_present">Not Present</option>
+                    <option value="present">Present</option>
+                  </select>
                 </div>
               </div>
 
