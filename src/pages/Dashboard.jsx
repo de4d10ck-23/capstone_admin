@@ -43,7 +43,10 @@ const Dashboard = () => {
 
   const safeCount = overview?.water_locations?.safe ?? locations.filter((l) => l.status === "safe").length;
   const warningCount = overview?.water_locations?.warning ?? locations.filter((l) => l.status === "warning").length;
-  const dangerCount = overview?.water_locations?.undrinkable ?? locations.filter((l) => l.status === "undrinkable" || l.status === "contaminated").length;
+  const contaminatedCount =
+    locations.length > 0
+      ? locations.filter((l) => l.status === "undrinkable" || l.status === "contaminated").length
+      : (overview?.water_locations?.undrinkable ?? 0);
 
   return (
     <div className="space-y-8 animate-fade-in font-sans">
@@ -98,10 +101,10 @@ const Dashboard = () => {
 
         <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Warning Level</p>
-            <h3 className="text-3xl font-bold text-amber-600 mt-1">{warningCount}</h3>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Contaminated</p>
+            <h3 className="text-3xl font-bold text-red-600 mt-1">{contaminatedCount}</h3>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-xl bg-red-50 text-red-600 flex items-center justify-center">
             <AlertTriangle size={24} />
           </div>
         </div>
