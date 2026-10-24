@@ -55,10 +55,15 @@ const WaterSources = () => {
     setErrorMsg("");
     setSuccessMsg("");
     if (sourceToEdit) {
-      const eColiPresent = Boolean(sourceToEdit.e_coli || (sourceToEdit.e_coli_count && Number(sourceToEdit.e_coli_count) > 0));
-      setEditingSource(sourceToEdit);
       const rawStatus = (sourceToEdit.status || "safe").toLowerCase();
       const normalizedStatus = rawStatus === "undrinkable" ? "contaminated" : rawStatus;
+      const isUnknown = normalizedStatus === "unknown" || sourceToEdit.e_coli === null || sourceToEdit.e_coli === undefined;
+      const eColiPresent = isUnknown
+        ? "unknown"
+        : Boolean(sourceToEdit.e_coli || (sourceToEdit.e_coli_count && Number(sourceToEdit.e_coli_count) > 0))
+        ? "present"
+        : "not_present";
+      setEditingSource(sourceToEdit);
 
       setFormData({
         name: sourceToEdit.name || sourceToEdit.full_name || "",
@@ -68,8 +73,8 @@ const WaterSources = () => {
         longitude: sourceToEdit.longitude || 124.8700,
         status: normalizedStatus,
         e_coli_present: eColiPresent,
-        e_coli_count: eColiPresent ? 1 : 0,
-        coliform_count: eColiPresent ? 1 : 0,
+        e_coli_count: eColiPresent === "present" ? 1 : 0,
+        coliform_count: eColiPresent === "present" ? 1 : 0,
         sample_date: sourceToEdit.sample_date || "",
         sample_time: sourceToEdit.sample_time || "",
         description: sourceToEdit.description || ""
@@ -103,21 +108,22 @@ const WaterSources = () => {
       const url = editingSource ? `${API_URL}/water-locations/${editingSource.id}` : `${API_URL}/water-locations`;
       const method = editingSource ? "PUT" : "POST";
 
-      const isPresent = Boolean(formData.e_coli_present);
+      const isPresent = formData.e_coli_present === "present" || formData.e_coli_present === true;
+      const isEColiUnknown = formData.e_coli_present === "unknown" || formData.e_coli_present === null;
       const isContaminated = formData.status === "contaminated" || formData.status === "undrinkable";
       const isSafe = formData.status === "safe";
-      const isUnknown = formData.status === "unknown";
+      const isUnknown = formData.status === "unknown" || isEColiUnknown;
 
       const payload = {
         ...formData,
         status: isContaminated ? "contaminated" : (isUnknown ? "unknown" : (isSafe ? "safe" : "warning")),
         latitude: parseFloat(formData.latitude),
         longitude: parseFloat(formData.longitude),
-        e_coli: isPresent,
-        e_coli_count: isPresent ? 1 : 0,
-        coliform_count: isPresent ? 1 : 0,
-        coliform_bacteria: isPresent,
-        bacteriological_exam: isPresent || isContaminated ? "failed" : (isUnknown ? "untested" : "passed")
+        e_coli: (isUnknown || isEColiUnknown) ? null : isPresent,
+        e_coli_count: (isUnknown || isEColiUnknown) ? 0 : (isPresent ? 1 : 0),
+        coliform_count: (isUnknown || isEColiUnknown) ? 0 : (isPresent ? 1 : 0),
+        coliform_bacteria: (isUnknown || isEColiUnknown) ? null : isPresent,
+        bacteriological_exam: (isUnknown || isEColiUnknown) ? "untested" : (isPresent || isContaminated ? "failed" : "passed")
       };
 
 
@@ -435,13 +441,19 @@ const WaterSources = () => {
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">Safety Status</label>
                   <select
-                    value={formData.status}
+                    value={formData.status === "undrinkable" ? "contaminated" : formData.status}
                     onChange={(e) => {
                       const newStatus = e.target.value;
                       setFormData((prev) => ({
                         ...prev,
                         status: newStatus,
-                        e_coli_present: (newStatus === "contaminated" || newStatus === "undrinkable") ? true : (newStatus === "safe" ? false : prev.e_coli_present)
+                        e_coli_present: (newStatus === "contaminated" || newStatus === "undrinkable")
+                          ? "present"
+                          : newStatus === "safe"
+                          ? "not_present"
+                          : newStatus === "unknown"
+                          ? "unknown"
+                          : prev.e_coli_present
                       }));
                     }}
                     className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-600 font-medium"
@@ -458,21 +470,30 @@ const WaterSources = () => {
                     E. Coli Presence
                   </label>
                   <select
-                    value={formData.e_coli_present ? "present" : "not_present"}
+                    value={
+                      formData.status === "unknown" || formData.e_coli_present === "unknown" || formData.e_coli_present === null
+                        ? "unknown"
+                        : (formData.e_coli_present === "present" || formData.e_coli_present === true ? "present" : "not_present")
+                    }
                     onChange={(e) => {
-                        const isPresent = e.target.value === "present";
-                        setFormData((prev) => ({
-                          ...prev,
-                          e_coli_present: isPresent,
-                          e_coli_count: isPresent ? 1 : 0,
-                          coliform_count: isPresent ? 1 : 0,
-                          status: isPresent && prev.status === "safe" ? "contaminated" : prev.status
-                        }));
+                      const val = e.target.value;
+                      setFormData((prev) => ({
+                        ...prev,
+                        e_coli_present: val,
+                        e_coli_count: val === "present" ? 1 : 0,
+                        coliform_count: val === "present" ? 1 : 0,
+                        status: val === "present" && (prev.status === "safe" || prev.status === "unknown")
+                          ? "contaminated"
+                          : val === "unknown"
+                          ? "unknown"
+                          : prev.status
+                      }));
                     }}
                     className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-600 font-medium"
                   >
                     <option value="not_present">Not Present</option>
                     <option value="present">Present</option>
+                    <option value="unknown">Unknown</option>
                   </select>
                 </div>
               </div>
