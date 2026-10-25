@@ -21,6 +21,8 @@ const UserManagement = () => {
     barangay: "Combado"
   });
 
+  const [modalError, setModalError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
@@ -48,6 +50,7 @@ const UserManagement = () => {
   const handleOpenModal = (userToEdit = null) => {
     setErrorMsg("");
     setSuccessMsg("");
+    setModalError("");
     if (userToEdit) {
       setEditingUser(userToEdit);
       setFormData({
@@ -74,8 +77,10 @@ const UserManagement = () => {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    setModalError("");
     setErrorMsg("");
     setSuccessMsg("");
+    setIsSubmitting(true);
 
     try {
       const url = editingUser ? `${API_URL}/users/${editingUser.id}` : `${API_URL}/users`;
@@ -99,16 +104,20 @@ const UserManagement = () => {
       });
 
       const data = await res.json();
-      if (data.success) {
+      if (res.ok && data.success) {
         setSuccessMsg(editingUser ? "User updated successfully!" : "New user created successfully!");
+        setModalError("");
         setIsModalOpen(false);
         fetchUsers();
       } else {
-        setErrorMsg(data.detail || "Operation failed.");
+        const errorDetail = data.detail || data.message || "Failed to save user account.";
+        setModalError(errorDetail);
       }
     } catch (err) {
       console.error("Error saving user:", err);
-      setErrorMsg("Network error saving user.");
+      setModalError("Network error saving user. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -304,7 +313,26 @@ const UserManagement = () => {
             <h2 className="text-xl font-bold text-slate-900 mb-1">
               {editingUser ? "Edit User Account" : "Create New User"}
             </h2>
-            <p className="text-xs text-slate-500 mb-6">Assign system privileges and location coverage</p>
+            <p className="text-xs text-slate-500 mb-4">Assign system privileges and location coverage</p>
+
+            {/* Error Message Inside Modal */}
+            {modalError && (
+              <div className="mb-4 p-3.5 rounded-2xl bg-red-50 border border-red-200 text-red-900 text-xs flex items-start gap-2.5 shadow-sm animate-fade-in">
+                <AlertCircle size={16} className="text-red-600 flex-shrink-0 mt-0.5" />
+                <div className="space-y-0.5 flex-1 min-w-0">
+                  <span className="font-bold text-red-950 block">Unable to Save User</span>
+                  <p className="text-[11px] text-red-800 leading-relaxed break-words">{modalError}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setModalError("")}
+                  className="p-1 rounded-lg hover:bg-red-100 text-red-500 hover:text-red-700 transition-colors flex-shrink-0 cursor-pointer"
+                  title="Dismiss error"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            )}
 
             <form onSubmit={handleSave} className="space-y-4">
               <div>
@@ -325,11 +353,23 @@ const UserManagement = () => {
                   <input
                     type="text"
                     value={formData.username}
-                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                    onChange={(e) => {
+                      setFormData({ ...formData, username: e.target.value });
+                      if (modalError.toLowerCase().includes("username")) setModalError("");
+                    }}
                     placeholder="msantos"
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-600"
+                    className={`w-full px-3.5 py-2.5 rounded-xl text-xs text-slate-900 focus:outline-none transition-all ${
+                      modalError.toLowerCase().includes("username")
+                        ? "bg-red-50/50 border border-red-400 focus:border-red-600 focus:ring-2 focus:ring-red-200"
+                        : "bg-slate-50 border border-slate-200 focus:border-blue-600"
+                    }`}
                     required
                   />
+                  {modalError.toLowerCase().includes("username") && (
+                    <p className="text-[10px] text-red-600 mt-1 font-semibold">
+                      Username already taken
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -396,25 +436,44 @@ const UserManagement = () => {
                 <input
                   type="email"
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onChange={(e) => {
+                    setFormData({ ...formData, email: e.target.value });
+                    if (modalError.toLowerCase().includes("email")) setModalError("");
+                  }}
                   placeholder="user@maasincity.gov.ph"
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-600"
+                  className={`w-full px-3.5 py-2.5 rounded-xl text-xs text-slate-900 focus:outline-none transition-all ${
+                    modalError.toLowerCase().includes("email")
+                      ? "bg-red-50/50 border border-red-400 focus:border-red-600 focus:ring-2 focus:ring-red-200"
+                      : "bg-slate-50 border border-slate-200 focus:border-blue-600"
+                  }`}
                 />
+                {modalError.toLowerCase().includes("email") && (
+                  <p className="text-[10px] text-red-600 mt-1 font-semibold">
+                    Email address already registered
+                  </p>
+                )}
               </div>
 
               <div className="pt-4 flex gap-3">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="w-1/2 py-2.5 rounded-full border border-slate-200 text-slate-700 font-semibold text-xs hover:bg-slate-50"
+                  className="w-1/2 py-2.5 rounded-full border border-slate-200 text-slate-700 font-semibold text-xs hover:bg-slate-50 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="w-1/2 py-2.5 rounded-full bg-blue-900 hover:bg-blue-800 text-white font-semibold text-xs shadow-md"
+                  disabled={isSubmitting}
+                  className="w-1/2 py-2.5 rounded-full bg-blue-900 hover:bg-blue-800 disabled:bg-blue-300 text-white font-semibold text-xs shadow-md transition-all flex items-center justify-center gap-1.5"
                 >
-                  {editingUser ? "Save Changes" : "Create Account"}
+                  <span>
+                    {isSubmitting
+                      ? "Saving..."
+                      : editingUser
+                      ? "Save Changes"
+                      : "Create Account"}
+                  </span>
                 </button>
               </div>
             </form>

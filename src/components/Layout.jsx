@@ -36,7 +36,7 @@ const Layout = () => {
           />
           <div>
             <h1 className="font-bold text-base text-slate-900 leading-tight">WaterWatch</h1>
-            <p className="text-[11px] font-semibold text-blue-600 uppercase tracking-wider">Admin Control</p>
+            <p className="text-[11px] font-semibold text-blue-600 uppercase tracking-wider">CHU - Admin Control</p>
           </div>
         </div>
         {/* Mobile close button */}

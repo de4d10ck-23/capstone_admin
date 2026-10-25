@@ -61,8 +61,99 @@ const ForecastConfig = () => {
   // On-demand Barangay ML Surveillance & Alert State
   const [surveillanceBarangay, setSurveillanceBarangay] = useState("all");
   const [notifyResidentsOnFlag, setNotifyResidentsOnFlag] = useState(true);
+  const [bypassDailyLimit, setBypassDailyLimit] = useState(false);
   const [runningSurveillance, setRunningSurveillance] = useState(false);
   const [surveillanceResult, setSurveillanceResult] = useState(null);
+
+  // Background Model Run Interval (Scheduler) State
+  const [schedule, setSchedule] = useState(null);
+  const [intervalInput, setIntervalInput] = useState(60);
+  const [savingInterval, setSavingInterval] = useState(false);
+  const [now, setNow] = useState(Date.now());
+
+  // Tick every second for live countdown
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  const fetchSchedule = async () => {
+    try {
+      const res = await fetch(`${API_URL}/forecast/schedule`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (data.success && data.data) {
+        setSchedule(data.data);
+        setIntervalInput(data.data.run_interval_minutes);
+      }
+    } catch (err) {
+      console.warn("Could not fetch scheduler interval:", err);
+    }
+  };
+
+  const handleSaveInterval = async () => {
+    const minutes = parseInt(intervalInput, 10);
+    const min = schedule?.min_interval_minutes ?? 1;
+    const max = schedule?.max_interval_minutes ?? 1440;
+    setSuccessMsg("");
+    setErrorMsg("");
+    if (!Number.isFinite(minutes) || minutes < min || minutes > max) {
+      setErrorMsg(`Run interval must be between ${min} and ${max} minutes.`);
+      return;
+    }
+    setSavingInterval(true);
+    try {
+      const res = await fetch(`${API_URL}/forecast/schedule`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ run_interval_minutes: minutes }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setSchedule(data.data);
+        setSuccessMsg(data.message || `Model will now re-run every ${minutes} minute(s).`);
+      } else {
+        const detail = Array.isArray(data.detail) ? data.detail[0]?.msg : data.detail;
+        setErrorMsg(detail || "Failed to update run interval.");
+      }
+    } catch (err) {
+      console.error("Error saving run interval:", err);
+      setErrorMsg("Network error saving run interval.");
+    } finally {
+      setSavingInterval(false);
+    }
+  };
+
+  const formatInterval = (mins) => {
+    const m = Number(mins) || 0;
+    if (m < 60) return `${m} min`;
+    const h = Math.floor(m / 60);
+    const r = m % 60;
+    return r ? `${h} hr ${r} min` : `${h} hr${h > 1 ? "s" : ""}`;
+  };
+
+  const countdownLabel = useMemo(() => {
+    if (!schedule?.next_run) return "—";
+    const diff = Math.max(0, Math.floor((new Date(schedule.next_run).getTime() - now) / 1000));
+    if (diff === 0) return "Running soon...";
+    const h = Math.floor(diff / 3600);
+    const m = Math.floor((diff % 3600) / 60);
+    const s = diff % 60;
+    const pad = (n) => String(n).padStart(2, "0");
+    return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
+  }, [schedule, now]);
+
+  // Re-poll schedule after countdown completes so next_run stays fresh
+  useEffect(() => {
+    if (!schedule?.next_run) return;
+    const ms = new Date(schedule.next_run).getTime() - Date.now();
+    const t = setTimeout(fetchSchedule, Math.max(5000, ms + 8000));
+    return () => clearTimeout(t);
+  }, [schedule?.next_run]);
 
   // Derive list of barangays that have at least 1 monitored water source + station counts
   const barangaysWithSources = useMemo(() => {
@@ -133,6 +224,9 @@ const ForecastConfig = () => {
       } catch (hErr) {
         console.warn("Could not fetch heatmaps info:", hErr);
       }
+
+      // 5. Fetch background scheduler interval
+      await fetchSchedule();
     } catch (err) {
       console.error("Error fetching forecast config or model status:", err);
       setErrorMsg("Failed to connect to backend forecasting service.");
@@ -157,6 +251,7 @@ const ForecastConfig = () => {
       const data = await res.json();
       if (data.success && data.data) {
         setHeatmapsInfo(data.data);
+        fetchSchedule();
         setSuccessMsg("Both Hazard and Water Contamination heatmaps successfully recomputed! Map layers have been updated.");
       } else {
         setErrorMsg(data.detail || "Failed to recalculate heatmaps.");
@@ -280,6 +375,7 @@ const ForecastConfig = () => {
         notify_residents: notifyResidentsOnFlag,
         threshold_low: config.risk_threshold_low,
         threshold_high: config.risk_threshold_high,
+        bypass_daily_limit: bypassDailyLimit,
       });
 
       const res = await fetch(`${API_URL}/forecast/run-surveillance?${params.toString()}`, {
@@ -370,6 +466,100 @@ const ForecastConfig = () => {
           <span className="font-medium">{errorMsg}</span>
         </div>
       )}
+
+      {/* SECTION: BACKGROUND MODEL RUN INTERVAL */}
+      <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-sm space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center">
+              <Clock size={22} />
+            </div>
+            <div>
+              <h2 className="text-base font-bold text-slate-900">Background Model Run Interval</h2>
+              <p className="text-xs text-slate-500">
+                Set how many minutes the engine waits before automatically re-running the Random Forest model and refreshing the heatmaps.
+              </p>
+            </div>
+          </div>
+          <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-sky-800 bg-sky-50 border border-sky-100 px-3 py-1 rounded-full">
+            <span className={`w-2 h-2 rounded-full ${schedule?.is_running ? "bg-emerald-500 animate-pulse" : "bg-slate-400"}`} />
+            Every {formatInterval(schedule?.run_interval_minutes ?? 60)}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Next Run In</span>
+            <p className="text-2xl font-black text-slate-900 mt-1 font-mono tabular-nums">
+              {schedule?.is_updating ? "Running..." : countdownLabel}
+            </p>
+            <p className="text-[10px] text-slate-500 mt-0.5">
+              {schedule?.next_run ? `at ${new Date(schedule.next_run).toLocaleTimeString()}` : "Waiting for first run"}
+            </p>
+          </div>
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Last Run</span>
+            <p className="text-sm font-bold text-slate-900 mt-2">
+              {schedule?.last_updated ? new Date(schedule.last_updated).toLocaleString() : "—"}
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-slate-50/80 p-5 rounded-2xl border border-slate-100 space-y-4">
+          <div className="flex flex-col md:flex-row md:items-end gap-4">
+            <div className="space-y-1.5">
+              <label htmlFor="run-interval-input" className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                Re-run Every (Minutes)
+              </label>
+              <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-xl border border-slate-200 focus-within:border-sky-500 w-40">
+                <input
+                  id="run-interval-input"
+                  type="number"
+                  min={schedule?.min_interval_minutes ?? 1}
+                  max={schedule?.max_interval_minutes ?? 1440}
+                  step="1"
+                  value={intervalInput}
+                  onChange={(e) => setIntervalInput(e.target.value)}
+                  className="w-full font-mono text-sm font-bold text-slate-800 focus:outline-none"
+                />
+                <span className="text-[11px] text-slate-400">min</span>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2 flex-1">
+              {[5, 15, 30, 60, 120, 360, 720, 1440].map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  id={`interval-preset-${m}`}
+                  onClick={() => setIntervalInput(m)}
+                  className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold border transition-all cursor-pointer ${
+                    Number(intervalInput) === m
+                      ? "bg-sky-600 text-white border-sky-600 shadow-sm"
+                      : "bg-white text-slate-600 border-slate-200 hover:border-sky-300 hover:text-sky-700"
+                  }`}
+                >
+                  {formatInterval(m)}
+                </button>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              id="save-run-interval"
+              onClick={handleSaveInterval}
+              disabled={savingInterval || Number(intervalInput) === schedule?.run_interval_minutes}
+              className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs transition-all shadow-sm hover:shadow disabled:opacity-50 cursor-pointer"
+            >
+              <Save size={15} />
+              <span>{savingInterval ? "Saving..." : "Save Interval"}</span>
+            </button>
+          </div>
+          <p className="text-[11px] text-slate-500">
+            Allowed range: {schedule?.min_interval_minutes ?? 1} – {schedule?.max_interval_minutes ?? 1440} minutes. Changes apply immediately — the countdown is recalculated from the last run.
+          </p>
+        </div>
+      </div>
 
       {/* SECTION 1: PROBABILITY THRESHOLD CONTROLLER (USER FOCUS) */}
       <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-sm space-y-6">
@@ -541,7 +731,7 @@ const ForecastConfig = () => {
                 </span>
               </div>
               <p className="text-xs text-slate-500 mt-0.5">
-                Execute live Random Forest predictive risk modeling on a specific barangay or citywide. If any water source is flagged, automatically dispatch official public health advisories and Web Push notifications to registered residents without waiting for the 60-minute background engine.
+                Execute live Random Forest predictive risk modeling on a specific barangay or citywide. If any water source is classified <strong>Contaminated</strong>, automatically dispatch official public health advisories and Web Push notifications to registered residents without waiting for the {formatInterval(schedule?.run_interval_minutes ?? 60)} background engine. <em>(Warning sources do not push notify; limit 1 push per source/day).</em>
               </p>
             </div>
           </div>
@@ -576,7 +766,7 @@ const ForecastConfig = () => {
             </select>
           </div>
 
-          <div className="md:col-span-4 flex items-center h-full pt-4 md:pt-0">
+          <div className="md:col-span-4 flex flex-col justify-center h-full pt-4 md:pt-0 space-y-2">
             <label className="relative flex items-start gap-2.5 cursor-pointer select-none">
               <input
                 type="checkbox"
@@ -589,10 +779,22 @@ const ForecastConfig = () => {
                   Broadcast Push Notification to Residents
                 </span>
                 <span className="text-[10px] text-slate-500 block leading-tight">
-                  Dispatches Web Push & in-app advisories to residents of flagged barangays
+                  Only triggers for Contaminated sources (Safe/Warning are not pushed)
                 </span>
               </div>
             </label>
+
+            {notifyResidentsOnFlag && (
+              <label className="relative flex items-center gap-2 cursor-pointer select-none pl-6 text-[11px] text-slate-600">
+                <input
+                  type="checkbox"
+                  checked={bypassDailyLimit}
+                  onChange={(e) => setBypassDailyLimit(e.target.checked)}
+                  className="w-3.5 h-3.5 rounded text-amber-600 focus:ring-amber-500 border-slate-300"
+                />
+                <span>Bypass 1-push-per-day limit (Test Mode)</span>
+              </label>
+            )}
           </div>
 
           <div className="md:col-span-3">
@@ -718,6 +920,21 @@ const ForecastConfig = () => {
                       </div>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {/* Suppressed Duplicates Banner */}
+              {Array.isArray(surveillanceResult.suppressed_duplicates) && surveillanceResult.suppressed_duplicates.length > 0 && (
+                <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200 text-xs text-amber-900 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck size={16} className="text-amber-600 shrink-0" />
+                    <span>
+                      <strong>Anti-Spam Filter:</strong> {surveillanceResult.suppressed_duplicates.length} contaminated water source(s) were already notified today and were not re-pushed to avoid resident notification fatigue.
+                    </span>
+                  </div>
+                  <span className="text-[10px] bg-amber-100 text-amber-800 font-semibold px-2 py-0.5 rounded-md shrink-0">
+                    Daily Limit Enforced
+                  </span>
                 </div>
               )}
 
