@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import { Users, UserPlus, Search, Edit2, Trash2, Shield, CheckCircle, AlertCircle, X } from "lucide-react";
+import { Users, UserPlus, Search, Edit2, Trash2, Shield, CheckCircle, AlertCircle, X, Eye, EyeOff } from "lucide-react";
 import { MAASIN_BARANGAYS as barangays } from "../constants/barangays";
 
 const UserManagement = () => {
@@ -11,6 +11,7 @@ const UserManagement = () => {
   const [selectedRole, setSelectedRole] = useState("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
     username: "",
@@ -48,6 +49,7 @@ const UserManagement = () => {
   }, [token, API_URL]);
 
   const handleOpenModal = (userToEdit = null) => {
+    setShowPassword(false);
     setErrorMsg("");
     setSuccessMsg("");
     setModalError("");
@@ -80,13 +82,18 @@ const UserManagement = () => {
     setModalError("");
     setErrorMsg("");
     setSuccessMsg("");
+    const email = formData.email.trim();
+    if (!email) {
+      setModalError("Email address is required.");
+      return;
+    }
     setIsSubmitting(true);
 
     try {
       const url = editingUser ? `${API_URL}/users/${editingUser.id}` : `${API_URL}/users`;
       const method = editingUser ? "PUT" : "POST";
 
-      const bodyData = { ...formData };
+      const bodyData = { ...formData, email };
       if (bodyData.role !== "resident" && bodyData.role !== "barangay_official") {
         bodyData.barangay = null;
       }
@@ -111,7 +118,9 @@ const UserManagement = () => {
         fetchUsers();
       } else {
         const errorDetail = data.detail || data.message || "Failed to save user account.";
-        setModalError(errorDetail);
+        setModalError(Array.isArray(errorDetail)
+          ? errorDetail.map((error) => `${error.loc?.slice(1).join(".") || "Field"}: ${error.msg}`).join("; ")
+          : String(errorDetail));
       }
     } catch (err) {
       console.error("Error saving user:", err);
@@ -376,14 +385,25 @@ const UserManagement = () => {
                   <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
                     {editingUser ? "New Password (Optional)" : "Password"}
                   </label>
-                  <input
-                    type="password"
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    placeholder="••••••••"
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-600"
-                    required={!editingUser}
-                  />
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      placeholder="••••••••"
+                      className="w-full pl-3.5 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-600"
+                      required={!editingUser}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((visible) => !visible)}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      title={showPassword ? "Hide password" : "Show password"}
+                      className="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 rounded-r-xl"
+                    >
+                      {showPassword ? <EyeOff size={16} aria-hidden="true" /> : <Eye size={16} aria-hidden="true" />}
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -432,9 +452,11 @@ const UserManagement = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">Email Address</label>
+                <label htmlFor="user-email" className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">Email Address <span className="text-red-500">*</span></label>
                 <input
+                  id="user-email"
                   type="email"
+                  required
                   value={formData.email}
                   onChange={(e) => {
                     setFormData({ ...formData, email: e.target.value });
@@ -449,7 +471,7 @@ const UserManagement = () => {
                 />
                 {modalError.toLowerCase().includes("email") && (
                   <p className="text-[10px] text-red-600 mt-1 font-semibold">
-                    Email address already registered
+                    {modalError}
                   </p>
                 )}
               </div>

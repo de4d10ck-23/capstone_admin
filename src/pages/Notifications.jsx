@@ -64,7 +64,7 @@ const Notifications = () => {
 
       const data = await res.json();
       if (data.success) {
-        setSuccessMsg("Notification alert successfully broadcasted!");
+        setSuccessMsg(data.message || "Advisory posted.");
         setTitle("");
         setMessage("");
         fetchNotifications();
