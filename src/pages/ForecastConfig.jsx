@@ -252,7 +252,11 @@ const ForecastConfig = () => {
       if (data.success && data.data) {
         setHeatmapsInfo(data.data);
         fetchSchedule();
-        setSuccessMsg("Both Hazard and Water Contamination heatmaps successfully recomputed! Map layers have been updated.");
+        const refresh = data.data.forecast_refresh;
+        setSuccessMsg(`Map layers updated. ${refresh?.saved || 0} station forecasts saved for today through seven days ahead.`);
+        if (refresh && refresh.status !== "complete") {
+          setErrorMsg(refresh.error || `${refresh.failed} forecasts could not be refreshed. Previous successful forecasts are retained.`);
+        }
       } else {
         setErrorMsg(data.detail || "Failed to recalculate heatmaps.");
       }
@@ -373,8 +377,6 @@ const ForecastConfig = () => {
       const params = new URLSearchParams({
         barangay: surveillanceBarangay,
         notify_residents: notifyResidentsOnFlag,
-        threshold_low: config.risk_threshold_low,
-        threshold_high: config.risk_threshold_high,
         bypass_daily_limit: bypassDailyLimit,
       });
 
@@ -389,6 +391,9 @@ const ForecastConfig = () => {
       if (data.success && data.data) {
         setSurveillanceResult(data.data);
         const resData = data.data;
+        if (resData.stale_count || resData.unavailable_count || resData.forecast_refresh?.status !== "complete") {
+          setErrorMsg(`Forecast refresh was incomplete. ${resData.stale_count || 0} older predictions and ${resData.unavailable_count || 0} unavailable sources. Counts show the saved forecasts; older predictions do not trigger alerts.`);
+        }
         const flaggedCount = resData.flagged_count ?? resData.flagged_total ?? (resData.flagged_stations?.length || 0);
         const notifsList = Array.isArray(resData.notifications_dispatched)
           ? resData.notifications_dispatched
@@ -407,7 +412,7 @@ const ForecastConfig = () => {
             );
           } else {
             setSuccessMsg(
-              `Surveillance complete! Flagged ${flaggedCount} water source(s). (Resident notifications were not dispatched as per toggle).`
+              `Surveillance complete! Flagged ${flaggedCount} water source(s). (No new resident notifications dispatched).`
             );
           }
         } else {
@@ -416,7 +421,7 @@ const ForecastConfig = () => {
             ? `all ${barangaysWithSources.length} monitored barangays`
             : `Barangay ${resData.barangay}`;
           setSuccessMsg(
-            `Surveillance complete! All ${evalCount} water source(s) in ${brgyLabel} are operating within SAFE limits. No residents notified.`
+            `Surveillance complete! All ${evalCount} water source(s) in ${brgyLabel} have low predicted risk among the available forecasts. No residents notified.`
           );
         }
       } else {
@@ -820,6 +825,8 @@ const ForecastConfig = () => {
 
         {/* Results Display */}
         {surveillanceResult && (() => {
+          const lowPct = Math.round((surveillanceResult.thresholds_used?.low_cutoff ?? 0.3) * 100);
+          const highPct = Math.round((surveillanceResult.thresholds_used?.high_cutoff ?? 0.65) * 100);
           const evalCount = surveillanceResult.evaluated_stations ?? surveillanceResult.total_evaluated ?? 0;
           const safeCount = surveillanceResult.safe_count ?? surveillanceResult.summary?.safe ?? 0;
           const warnCount = surveillanceResult.warning_count ?? surveillanceResult.summary?.warning ?? 0;

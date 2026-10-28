@@ -212,7 +212,7 @@ const UserManagement = () => {
           >
             <option value="all">All Roles</option>
             <option value="admin">Administrator</option>
-            <option value="city_health_officer">City Health Officer</option>
+            <option value="city_health_officer">CHU - DOCTOR</option>
             <option value="sanitization_inspector">Sanitization Inspector</option>
             <option value="barangay_official">Barangay Official</option>
             <option value="resident">Resident</option>
@@ -275,7 +275,7 @@ const UserManagement = () => {
                             ? "bg-amber-100 text-amber-800"
                             : "bg-slate-100 text-slate-700"
                         }`}>
-                          {u.role?.replace(/_/g, " ")}
+                          {isRoleCHO ? "CHU - DOCTOR" : u.role?.replace(/_/g, " ")}
                         </span>
                       </td>
                       <td className="py-4 px-6 text-slate-700 font-medium">
@@ -425,7 +425,7 @@ const UserManagement = () => {
                     className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-600"
                   >
                     <option value="admin">Administrator</option>
-                    <option value="city_health_officer">City Health Officer</option>
+                    <option value="city_health_officer">CHU - DOCTOR</option>
                     <option value="sanitization_inspector">Sanitization Inspector</option>
                     <option value="barangay_official">Barangay Official</option>
                     <option value="resident">Resident</option>

@@ -1,17 +1,24 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import ErrorNotice from "../components/ErrorNotice";
 import { useAuth } from "../context/AuthContext";
-import { Droplets, Plus, Search, Edit2, Trash2, MapPin, CheckCircle, AlertCircle, X, ShieldCheck, AlertTriangle, Calendar, Clock } from "lucide-react";
+import { Droplets, Plus, Search, Edit2, Trash2, ArchiveRestore, MapPin, CheckCircle, AlertCircle, X, ShieldCheck, AlertTriangle, Calendar, Clock } from "lucide-react";
 import { MAASIN_BARANGAYS as barangays } from "../constants/barangays";
 
 const WaterSources = () => {
   const { token, API_URL } = useAuth();
   const [sources, setSources] = useState([]);
+  const [archivedSources, setArchivedSources] = useState([]);
+  const [archiveOpen, setArchiveOpen] = useState(false);
+  const [archiveLoading, setArchiveLoading] = useState(false);
+  const [archiveBusy, setArchiveBusy] = useState("");
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedBarangay, setSelectedBarangay] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const savingRef = useRef(false);
   const [editingSource, setEditingSource] = useState(null);
 
   const [formData, setFormData] = useState({
@@ -37,14 +44,30 @@ const WaterSources = () => {
       setLoading(true);
       const res = await fetch(`${API_URL}/water-locations`);
       const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(typeof data.detail === "string" ? data.detail : "Could not load water sources. Please retry.");
       if (data.success && Array.isArray(data.data)) {
         setSources(data.data);
       }
     } catch (err) {
       console.error("Error fetching water sources:", err);
+      setErrorMsg(err.message || "Could not load water sources.");
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchArchive = async () => {
+    setArchiveLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/water-locations/archive`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.detail || "Could not load archived stations.");
+      setArchivedSources(data.data || []);
+    } catch (err) {
+      setErrorMsg(err.message || "Could not load archived stations.");
+    } finally { setArchiveLoading(false); }
   };
 
   useEffect(() => {
@@ -67,7 +90,7 @@ const WaterSources = () => {
 
       setFormData({
         name: sourceToEdit.name || sourceToEdit.full_name || "",
-        source_type: sourceToEdit.source_type || "deep_well",
+        source_type: sourceToEdit.source_type || "unknown",
         barangay: sourceToEdit.barangay || "Combado",
         latitude: sourceToEdit.latitude || 10.1330,
         longitude: sourceToEdit.longitude || 124.8700,
@@ -101,9 +124,11 @@ const WaterSources = () => {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    if (savingRef.current) return;
     setErrorMsg("");
     setSuccessMsg("");
-
+    savingRef.current = true;
+    setSaving(true);
     try {
       const url = editingSource ? `${API_URL}/water-locations/${editingSource.id}` : `${API_URL}/water-locations`;
       const method = editingSource ? "PUT" : "POST";
@@ -147,11 +172,14 @@ const WaterSources = () => {
     } catch (err) {
       console.error("Error saving water source:", err);
       setErrorMsg("Network error saving water source.");
+    } finally {
+      savingRef.current = false;
+      setSaving(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this water source from the system?")) return;
+    if (!window.confirm("Archive this water station? You can restore it with its history later.")) return;
 
     try {
       const res = await fetch(`${API_URL}/water-locations/${id}`, {
@@ -160,14 +188,31 @@ const WaterSources = () => {
       });
       const data = await res.json();
       if (data.success) {
-        setSuccessMsg("Water location deleted.");
+        setSuccessMsg("Water station archived. Its history is preserved.");
         fetchSources();
+        if (archiveOpen) fetchArchive();
       } else {
         setErrorMsg(data.detail || "Failed to delete location.");
       }
     } catch (err) {
       console.error("Error deleting location:", err);
+      setErrorMsg("Could not archive the station. Check your connection and retry.");
     }
+  };
+
+  const handleRestore = async (id) => {
+    setArchiveBusy(id);
+    setErrorMsg("");
+    try {
+      const res = await fetch(`${API_URL}/water-locations/${id}/restore`, {
+        method: "POST", headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.detail || "Could not restore station.");
+      setSuccessMsg("Water station restored with its original status history.");
+      await Promise.all([fetchSources(), fetchArchive()]);
+    } catch (err) { setErrorMsg(err.message || "Could not restore station."); }
+    finally { setArchiveBusy(""); }
   };
 
   const filtered = sources.filter((s) => {
@@ -186,13 +231,14 @@ const WaterSources = () => {
           <h1 className="text-2xl font-bold text-slate-900">Water Sources Registry</h1>
           <p className="text-slate-500 text-xs mt-0.5">Manage tested water stations, wells, taps, and laboratory metrics</p>
         </div>
-        <button
-          onClick={() => handleOpenModal()}
-          className="inline-flex items-center gap-2 bg-blue-900 hover:bg-blue-800 text-white px-5 py-2.5 rounded-full text-xs font-semibold shadow-md hover:shadow-lg transition-all"
-        >
-          <Plus size={16} />
-          <span>Register New Water Station</span>
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button type="button" aria-pressed={archiveOpen} onClick={() => { if (!archiveOpen) fetchArchive(); setArchiveOpen(!archiveOpen); }} className={`inline-flex items-center gap-2 border px-4 py-2.5 rounded-full text-xs font-semibold transition-colors ${archiveOpen ? "bg-blue-900 hover:bg-blue-800 text-white border-blue-900 shadow-sm" : "bg-white hover:bg-slate-50 text-slate-800 border-slate-300"}`}>
+            <ArchiveRestore size={16} />Archived Stations
+          </button>
+          <button onClick={() => handleOpenModal()} className="inline-flex items-center gap-2 bg-blue-900 hover:bg-blue-800 text-white px-5 py-2.5 rounded-full text-xs font-semibold shadow-md hover:shadow-lg transition-all">
+            <Plus size={16} /><span>Register New Water Station</span>
+          </button>
+        </div>
       </div>
 
       {successMsg && (
@@ -202,12 +248,7 @@ const WaterSources = () => {
         </div>
       )}
 
-      {errorMsg && (
-        <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs flex items-center gap-2">
-          <AlertCircle size={16} className="text-red-600" />
-          <span>{errorMsg}</span>
-        </div>
-      )}
+      {!isModalOpen && <ErrorNotice error={errorMsg} />}
 
       {/* Filter and Search Bar */}
       <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex flex-col md:flex-row gap-4 justify-between items-center">
@@ -254,6 +295,22 @@ const WaterSources = () => {
         </div>
       </div>
 
+      {archiveOpen ? <section className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-100"><h2 className="font-bold text-slate-900">Archived water sources</h2><p className="text-xs text-slate-500 mt-1">Restore a station with its original record and status history.</p></div>
+        <div className="overflow-x-auto"><table className="w-full text-left text-xs">
+          <thead className="bg-slate-50 text-slate-500 uppercase"><tr><th className="px-6 py-3">Station</th><th className="px-6 py-3">Barangay</th><th className="px-6 py-3">Status when archived</th><th className="px-6 py-3">Archived</th><th className="px-6 py-3 text-right">Action</th></tr></thead>
+          <tbody className="divide-y divide-slate-100">
+            {archiveLoading ? <tr><td colSpan={5} className="p-8 text-center text-slate-500">Loading archive...</td></tr>
+              : archivedSources.length === 0 ? <tr><td colSpan={5} className="p-8 text-center text-slate-500">No archived stations.</td></tr>
+              : archivedSources.map((source) => <tr key={source.id}>
+                <td className="px-6 py-4 font-semibold text-slate-900">{source.full_name || source.name}</td><td className="px-6 py-4 text-slate-600">Brgy. {source.barangay}</td>
+                <td className="px-6 py-4 capitalize text-slate-600">{source.status || "Unknown"}</td>
+                <td className="px-6 py-4 text-slate-600">{source.archived_at ? new Date(source.archived_at).toLocaleString("en-PH", { timeZone: "Asia/Manila" }) : ""}<span className="block text-slate-400">{source.archived_by_name || "Staff"}</span></td>
+                <td className="px-6 py-4 text-right"><button type="button" disabled={Boolean(archiveBusy)} onClick={() => handleRestore(source.id)} className="inline-flex items-center gap-1.5 rounded-full bg-blue-900 text-white px-3 py-2 font-semibold disabled:opacity-50"><ArchiveRestore size={14} />{archiveBusy === source.id ? "Restoring..." : "Restore"}</button></td>
+              </tr>)}
+          </tbody>
+        </table></div>
+      </section> : <>
       {/* Sources Table */}
       <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
@@ -297,7 +354,7 @@ const WaterSources = () => {
                     <tr key={s.id} className="hover:bg-slate-50/80 transition-colors">
                       <td className="py-4 px-6 font-bold text-slate-900">{s.name}</td>
                       <td className="py-4 px-6 text-slate-700 font-medium">Brgy. {s.barangay}</td>
-                      <td className="py-4 px-6 text-slate-600 capitalize">{s.source_type?.replace(/_/g, " ") || "Deep Well"}</td>
+                      <td className="py-4 px-6 text-slate-600 capitalize">{s.source_type?.replace(/_/g, " ") || "Unknown"}</td>
                       <td className="py-4 px-6">
                         <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                           isSafe 
@@ -351,11 +408,13 @@ const WaterSources = () => {
         </div>
       </div>
 
+      </>}
       {/* Add / Edit Water Source Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-xl w-full p-8 shadow-2xl border border-slate-100 relative animate-fade-in">
+          <div className="bg-white rounded-3xl max-w-xl w-full p-8 shadow-2xl border border-slate-100 relative animate-fade-in max-h-[92vh] overflow-y-auto">
             <button
+              disabled={saving}
               onClick={() => setIsModalOpen(false)}
               className="absolute top-6 right-6 text-slate-400 hover:text-slate-700"
             >
@@ -368,6 +427,8 @@ const WaterSources = () => {
             <p className="text-xs text-slate-500 mb-6">Enter GPS coordinates, laboratory testing numbers, and location</p>
 
             <form onSubmit={handleSave} className="space-y-4">
+              <ErrorNotice error={errorMsg} />
+              <fieldset disabled={saving} className="contents">
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">Station Name</label>
                 <input
@@ -388,9 +449,10 @@ const WaterSources = () => {
                     onChange={(e) => setFormData({ ...formData, source_type: e.target.value })}
                     className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-600"
                   >
+                    <option value="unknown">Unknown / Not recorded</option>
                     <option value="deep_well">Deep Well</option>
                     <option value="spring">Natural Spring</option>
-                    <option value="piped_water">Piped Water (Tap)</option>
+                    <option value="piped_tap">Piped Water (Tap)</option>
                     <option value="shallow_well">Shallow Well</option>
                     <option value="refilling_station">Water Refilling Station</option>
                   </select>
@@ -532,9 +594,10 @@ const WaterSources = () => {
                   type="submit"
                   className="w-1/2 py-2.5 rounded-full bg-blue-900 hover:bg-blue-800 text-white font-semibold text-xs shadow-md"
                 >
-                  {editingSource ? "Save Changes" : "Register Station"}
+                  {saving ? "Saving..." : editingSource ? "Save Changes" : "Register Station"}
                 </button>
               </div>
+              </fieldset>
             </form>
           </div>
         </div>

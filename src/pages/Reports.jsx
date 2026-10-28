@@ -1,3 +1,4 @@
+import { downloadReport } from "../utils/reportDownloads";
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { FileText, Download, Plus, Filter, Calendar, CheckCircle2, AlertCircle, RefreshCw } from "lucide-react";
@@ -201,16 +202,9 @@ const Reports = () => {
                     </td>
                     <td className="py-4 px-6 text-right">
                       <button
-                        onClick={() => {
-                          const csvContent = "data:text/csv;charset=utf-8,Report Title,Scope,Date\n" + `${r.title},${r.barangay || 'City Wide'},${r.created_at}\n`;
-                          const encodedUri = encodeURI(csvContent);
-                          const link = document.createElement("a");
-                          link.setAttribute("href", encodedUri);
-                          link.setAttribute("download", `${r.title.replace(/\s+/g, "_")}.csv`);
-                          document.body.appendChild(link);
-                          link.click();
-                          document.body.removeChild(link);
-                        }}
+                        onClick={() => downloadReport(API_URL, token, r.id).catch((err) => setErrorMsg(err.message))}
+                        disabled={!r.schema_version}
+                        title={r.schema_version ? "Download archived report data" : "Legacy metadata only. Generate a new report."}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 text-blue-700 hover:bg-blue-50 font-semibold transition-colors"
                       >
                         <Download size={14} />
