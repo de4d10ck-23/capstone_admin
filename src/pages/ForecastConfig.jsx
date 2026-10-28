@@ -483,6 +483,7 @@ const ForecastConfig = () => {
               <h2 className="text-base font-bold text-slate-900">Background Model Run Interval</h2>
               <p className="text-xs text-slate-500">
                 Set how many minutes the engine waits before automatically re-running the Random Forest model and refreshing the heatmaps.
+                {" "}Run times are shown in Philippine time (UTC+8).
               </p>
             </div>
           </div>
@@ -499,13 +500,13 @@ const ForecastConfig = () => {
               {schedule?.is_updating ? "Running..." : countdownLabel}
             </p>
             <p className="text-[10px] text-slate-500 mt-0.5">
-              {schedule?.next_run ? `at ${new Date(schedule.next_run).toLocaleTimeString()}` : "Waiting for first run"}
+              {schedule?.next_run ? `at ${new Date(schedule.next_run).toLocaleTimeString("en-PH", { timeZone: "Asia/Manila" })} PHT` : "Waiting for first run"}
             </p>
           </div>
           <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Last Run</span>
             <p className="text-sm font-bold text-slate-900 mt-2">
-              {schedule?.last_updated ? new Date(schedule.last_updated).toLocaleString() : "—"}
+              {schedule?.last_updated ? `${new Date(schedule.last_updated).toLocaleString("en-PH", { timeZone: "Asia/Manila" })} PHT` : "—"}
             </p>
           </div>
         </div>
