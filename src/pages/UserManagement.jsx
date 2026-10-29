@@ -131,6 +131,10 @@ const UserManagement = () => {
   };
 
   const handleDelete = async (userId) => {
+    if (users.find((u) => u.id === userId)?.username?.trim().toLowerCase() === "admin") {
+      setErrorMsg("The admin account cannot be deleted.");
+      return;
+    }
     if (!window.confirm("Are you sure you want to permanently delete this user account?")) return;
 
     try {
@@ -292,8 +296,10 @@ const UserManagement = () => {
                           </button>
                           <button
                             onClick={() => handleDelete(u.id)}
-                            className="p-1.5 rounded-lg border border-red-100 text-red-600 hover:bg-red-50 transition-colors"
-                            title="Delete User"
+                            disabled={u.username?.trim().toLowerCase() === "admin"}
+                            className="p-1.5 rounded-lg border border-red-100 text-red-600 hover:bg-red-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                            title={u.username?.trim().toLowerCase() === "admin" ? "The admin account cannot be deleted" : "Delete User"}
+                            aria-label={u.username?.trim().toLowerCase() === "admin" ? "The admin account cannot be deleted" : "Delete User"}
                           >
                             <Trash2 size={14} />
                           </button>
