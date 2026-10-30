@@ -448,11 +448,11 @@ const ForecastConfig = () => {
               Machine Learning & Spatial Risk Controls
             </h1>
             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 uppercase tracking-wider">
-              Random Forest v1.0
+              Random Forest + study hazards
             </span>
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            Configure risk probability cutoffs, meteorological & GIS spatial weights, and trigger on-demand barangay surveillance alerts.
+            Configure risk-index cutoffs, review study-map hazard weights, and trigger barangay surveillance alerts.
           </p>
         </div>
       </div>
@@ -471,6 +471,19 @@ const ForecastConfig = () => {
           <span className="font-medium">{errorMsg}</span>
         </div>
       )}
+
+      {modelStatus?.hazard_weights && <div className="bg-white rounded-3xl p-6 border border-slate-200 space-y-3">
+        <h2 className="text-base font-bold text-slate-900">Study-map hazard weights</h2>
+        <p className="text-xs text-slate-600">Provisional weights adjust the existing model baseline. They are not calibrated contamination probabilities. Nearby sources use distance decay within the same barangay; estimated icon-fill zones receive reduced weight.</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+          {Object.entries(modelStatus.hazard_weights.natural).map(([code, weight]) => <p key={code}>
+            {{ F: 'Flood susceptible', HL: 'High landslide', ML: 'Moderate landslide', LL: 'Low landslide', OUT: 'Outside assessed zones (unknown)' }[code] || code}: <strong>{weight}</strong>
+          </p>)}
+          {Object.entries(modelStatus.hazard_weights.sources).map(([category, rule]) => <p key={category}>
+            {{ livestock: 'Poultry & livestock', sanitation: 'Septic tanks & sanitation', agriculture: 'Agriculture', waste: 'Waste & wastewater', waterways: 'Waterways & drainage', other: 'Other / unclassified' }[category] || category}: <strong>{rule.weight}</strong> (within {rule.radius_m} m)
+          </p>)}
+        </div>
+      </div>}
 
       {/* SECTION: BACKGROUND MODEL RUN INTERVAL */}
       <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-sm space-y-6">
@@ -575,9 +588,9 @@ const ForecastConfig = () => {
               <Gauge size={22} />
             </div>
             <div>
-              <h2 className="text-base font-bold text-slate-900">Contamination Risk Probability Cutoffs</h2>
+              <h2 className="text-base font-bold text-slate-900">Environmental Risk Index Cutoffs</h2>
               <p className="text-xs text-slate-500">
-                Determine the exact probability boundaries for Safe, At Risk, and Contaminated classifications
+                Set score boundaries for low, moderate, and high estimated risk. These are not water-test classifications
               </p>
             </div>
           </div>
@@ -596,7 +609,7 @@ const ForecastConfig = () => {
               <AlertTriangle size={14} /> At Risk / Medium ({lowPct}% – {highPct}%)
             </span>
             <span className="flex items-center gap-1 text-rose-700">
-              <ShieldAlert size={14} /> Contaminated ({highPct}% – 100%)
+              <ShieldAlert size={14} /> High Risk ({highPct}% – 100%)
             </span>
           </div>
 
@@ -622,7 +635,7 @@ const ForecastConfig = () => {
             </div>
           </div>
           <p className="text-[11px] text-slate-400 italic">
-            When rainfall or proximity elevates probability past {highPct}%, automated resident boil-water alerts are triggered.
+            When rainfall or proximity elevates risk index past {highPct}%, resident environmental-risk alerts become eligible, subject to freshness and delivery limits.
           </p>
         </div>
 
@@ -663,7 +676,7 @@ const ForecastConfig = () => {
                 className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600"
               />
               <p className="text-[11px] text-slate-500">
-                Water sources with ML contamination probability below this are tagged Safe.
+                Water sources with risk index below this are classified as low estimated risk.
               </p>
             </div>
 
@@ -672,7 +685,7 @@ const ForecastConfig = () => {
               <div className="flex justify-between items-center">
                 <label className="text-xs font-bold uppercase tracking-wider text-rose-800 flex items-center gap-1.5">
                   <div className="w-2.5 h-2.5 rounded-full bg-rose-500" />
-                  High Risk Cutoff (Contaminated Lower Limit)
+                  High Risk Cutoff (High Risk Lower Limit)
                 </label>
                 <div className="flex items-center gap-1 bg-white px-2 py-0.5 rounded-lg border border-slate-200 shadow-xs">
                   <input
@@ -701,7 +714,7 @@ const ForecastConfig = () => {
                 className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-rose-600"
               />
               <p className="text-[11px] text-slate-500">
-                Water sources with probability exceeding this threshold are tagged Contaminated / Boil Water.
+                Water sources with a risk index exceeding this threshold are classified as high estimated risk.
               </p>
             </div>
           </div>
@@ -737,7 +750,7 @@ const ForecastConfig = () => {
                 </span>
               </div>
               <p className="text-xs text-slate-500 mt-0.5">
-                Execute live Random Forest predictive risk modeling on a specific barangay or citywide. If any water source is classified <strong>Contaminated</strong>, automatically dispatch official public health advisories and Web Push notifications to registered residents without waiting for the {formatInterval(schedule?.run_interval_minutes ?? 60)} background engine. <em>(Warning sources do not push notify; limit 1 push per source/day).</em>
+                Execute live Random Forest predictive risk modeling on a specific barangay or citywide. If any water source is classified <strong>High Risk</strong>, automatically dispatch official public health advisories and Web Push notifications to registered residents without waiting for the {formatInterval(schedule?.run_interval_minutes ?? 60)} background engine. <em>(Warning sources do not push notify; limit 1 push per source/day).</em>
               </p>
             </div>
           </div>
@@ -785,7 +798,7 @@ const ForecastConfig = () => {
                   Broadcast Push Notification to Residents
                 </span>
                 <span className="text-[10px] text-slate-500 block leading-tight">
-                  Only triggers for Contaminated sources (Safe/Warning are not pushed)
+                  Only triggers for High Risk sources (Safe/Warning are not pushed)
                 </span>
               </div>
             </label>
@@ -883,7 +896,7 @@ const ForecastConfig = () => {
 
                 <div className="p-3.5 rounded-2xl bg-rose-50/60 border border-rose-200">
                   <span className="text-[10px] font-bold text-rose-700 uppercase tracking-wider block">
-                    Contaminated
+                    High Risk
                   </span>
                   <p className="text-xl font-black text-rose-800 mt-0.5">
                     {contamCount}
@@ -991,7 +1004,7 @@ const ForecastConfig = () => {
                                     : "bg-amber-100 text-amber-800 border border-amber-200"
                                 }`}
                               >
-                                {station.risk_level} ({station.risk_percentage}%)
+                                {station.risk_level} ({station.risk_percentage}/100)
                               </span>
                             </div>
                           </div>
