@@ -185,11 +185,11 @@ const Reports = () => {
               ) : (
                 reports.map((r) => (
                   <tr key={r.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-4 px-6 font-bold text-slate-900 flex items-center gap-2">
+                    <td className="py-4 px-6 font-bold text-slate-900 flex items-center gap-2 max-w-[180px] sm:max-w-xs">
                       <FileText size={16} className="text-blue-600 flex-shrink-0" />
-                      <span>{r.title}</span>
+                      <span className="truncate" title={r.title}>{r.title}</span>
                     </td>
-                    <td className="py-4 px-6 text-slate-600 capitalize">
+                    <td className="py-4 px-6 text-slate-600 capitalize max-w-[150px] truncate">
                       {r.barangay ? `Brgy. ${r.barangay}` : "City Wide"} ({r.report_type || "Audit"})
                     </td>
                     <td className="py-4 px-6 text-slate-600">

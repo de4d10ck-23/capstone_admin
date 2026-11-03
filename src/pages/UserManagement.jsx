@@ -168,12 +168,12 @@ const UserManagement = () => {
       {/* Top Banner */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">User Management</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900">User Management</h1>
           <p className="text-slate-500 text-xs mt-0.5">Manage credentials, permissions, and roles for staff and residents</p>
         </div>
         <button
           onClick={() => handleOpenModal()}
-          className="inline-flex items-center gap-2 bg-blue-900 hover:bg-blue-800 text-white px-5 py-2.5 rounded-full text-xs font-semibold shadow-md hover:shadow-lg transition-all"
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-blue-900 hover:bg-blue-800 text-white px-5 py-2.5 rounded-full text-xs font-semibold shadow-md hover:shadow-lg transition-all"
         >
           <UserPlus size={16} />
           <span>Create New Staff / Admin</span>
@@ -195,7 +195,7 @@ const UserManagement = () => {
       )}
 
       {/* Filter and Search Bar */}
-      <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex flex-col sm:flex-row gap-4 justify-between items-center">
+      <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex flex-col sm:flex-row gap-3 sm:gap-4 justify-between items-center">
         <div className="relative w-full sm:w-80">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
           <input
@@ -207,12 +207,12 @@ const UserManagement = () => {
           />
         </div>
 
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          <span className="text-xs text-slate-500 font-medium">Filter Role:</span>
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <span className="hidden sm:inline text-xs text-slate-500 font-medium shrink-0">Filter Role:</span>
           <select
             value={selectedRole}
             onChange={(e) => setSelectedRole(e.target.value)}
-            className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none"
+            className="w-full sm:w-auto px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none truncate"
           >
             <option value="all">All Roles</option>
             <option value="admin">Administrator</option>
@@ -224,8 +224,84 @@ const UserManagement = () => {
         </div>
       </div>
 
-      {/* Users Table */}
-      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
+      {/* Users Card List (< md) */}
+      <div className="md:hidden bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden divide-y divide-slate-100">
+        {loading ? (
+          <div className="p-8 text-center text-slate-400 text-xs">Loading user database...</div>
+        ) : filteredUsers.length === 0 ? (
+          <div className="p-8 text-center text-slate-400 text-xs">No users found matching query.</div>
+        ) : (
+          filteredUsers.map((u) => {
+            const isRoleAdmin = u.role === "admin";
+            const isRoleCHO = u.role === "city_health_officer";
+            const isRoleInspector = u.role === "sanitization_inspector";
+            const isRoleBarangay = u.role === "barangay_official";
+
+            return (
+              <div key={u.id} className="p-4 space-y-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="w-9 h-9 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center font-bold text-xs shrink-0">
+                      {u.full_name?.charAt(0) || u.username?.charAt(0) || "U"}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-bold text-sm text-slate-900 truncate" title={u.full_name || "N/A"}>
+                        {u.full_name || "N/A"}
+                      </p>
+                      <p className="text-[11px] text-slate-400 truncate" title={u.email || "No email on file"}>
+                        {u.email || "No email on file"}
+                      </p>
+                      <p className="text-[11px] font-mono text-slate-500 mt-0.5 truncate">
+                        @{u.username}
+                      </p>
+                    </div>
+                  </div>
+                  <span className={`shrink-0 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                    isRoleAdmin
+                      ? "bg-purple-100 text-purple-800"
+                      : isRoleCHO
+                      ? "bg-blue-100 text-blue-800"
+                      : isRoleInspector
+                      ? "bg-cyan-100 text-cyan-800"
+                      : isRoleBarangay
+                      ? "bg-amber-100 text-amber-800"
+                      : "bg-slate-100 text-slate-700"
+                  }`}>
+                    {isRoleCHO ? "CHU - DOCTOR" : u.role?.replace(/_/g, " ")}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-50 text-xs text-slate-600">
+                  <span className="font-medium bg-slate-100 px-2.5 py-1 rounded-md text-[11px]">
+                    {u.barangay ? `Brgy. ${u.barangay}` : "City Wide"}
+                  </span>
+
+                  <div className="inline-flex items-center gap-2">
+                    <button
+                      onClick={() => handleOpenModal(u)}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold"
+                    >
+                      <Edit2 size={13} />
+                      <span>Edit</span>
+                    </button>
+                    <button
+                      onClick={() => handleDelete(u.id)}
+                      disabled={u.username?.trim().toLowerCase() === "admin"}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-red-100 text-red-600 hover:bg-red-50 text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      <Trash2 size={13} />
+                      <span>Delete</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* Users Desktop Table (>= md) */}
+      <div className="hidden md:block bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50 text-slate-500 font-semibold uppercase tracking-wider border-b border-slate-100">
@@ -255,18 +331,18 @@ const UserManagement = () => {
 
                   return (
                     <tr key={u.id} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="py-4 px-6">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center font-bold text-xs">
+                      <td className="py-4 px-6 max-w-[180px] sm:max-w-xs">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center font-bold text-xs flex-shrink-0">
                             {u.full_name?.charAt(0) || u.username?.charAt(0) || "U"}
                           </div>
-                          <div>
-                            <p className="font-bold text-slate-900">{u.full_name || "N/A"}</p>
-                            <p className="text-[11px] text-slate-400">{u.email || "No email on file"}</p>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-bold text-slate-900 truncate" title={u.full_name || "N/A"}>{u.full_name || "N/A"}</p>
+                            <p className="text-[11px] text-slate-400 truncate" title={u.email || "No email on file"}>{u.email || "No email on file"}</p>
                           </div>
                         </div>
                       </td>
-                      <td className="py-4 px-6 font-mono text-slate-700">{u.username}</td>
+                      <td className="py-4 px-6 font-mono text-slate-700 max-w-[130px] sm:max-w-[180px] truncate" title={u.username}>{u.username}</td>
                       <td className="py-4 px-6">
                         <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                           isRoleAdmin
@@ -316,8 +392,8 @@ const UserManagement = () => {
 
       {/* Add / Edit User Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-8 shadow-2xl border border-slate-100 relative animate-fade-in">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-5 sm:p-8 max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-100 relative animate-fade-in">
             <button
               onClick={() => setIsModalOpen(false)}
               className="absolute top-6 right-6 text-slate-400 hover:text-slate-700"

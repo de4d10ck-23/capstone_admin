@@ -51,11 +51,11 @@ const Dashboard = () => {
   return (
     <div className="space-y-8 animate-fade-in font-sans">
       {/* Top Banner */}
-      <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-cyan-800 rounded-3xl p-8 text-white shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-        <div>
-          <span className="text-xs font-bold uppercase tracking-wider text-cyan-300">Central Control Hub</span>
-          <h1 className="text-3xl font-extrabold text-white">System Administrator Console</h1>
-          <p className="text-white/80 text-sm max-w-xl mt-1">
+      <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-cyan-800 rounded-3xl p-5 sm:p-8 text-white shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6 overflow-hidden">
+        <div className="min-w-0 w-full flex-1">
+          <span className="text-xs font-bold uppercase tracking-wider text-cyan-300 block truncate">Central Control Hub</span>
+          <h1 className="text-xl sm:text-3xl font-extrabold text-white truncate">System Administrator Console</h1>
+          <p className="text-white/80 text-xs sm:text-sm max-w-xl mt-1">
             Global management of Maasin City water quality records, user accounts, spatial forecasting weights, and compliance reports.
           </p>
         </div>
@@ -78,44 +78,44 @@ const Dashboard = () => {
       </div>
 
       {/* Overview Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
+        <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Registered Stations</p>
-            <h3 className="text-3xl font-bold text-slate-900 mt-1">{locations.length}</h3>
+            <p className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Registered Stations</p>
+            <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">{locations.length}</h3>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-            <Droplets size={24} />
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+            <Droplets size={22} />
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Verified Safe</p>
-            <h3 className="text-3xl font-bold text-emerald-600 mt-1">{safeCount}</h3>
+            <p className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Verified Safe</p>
+            <h3 className="text-2xl sm:text-3xl font-bold text-emerald-600 mt-1">{safeCount}</h3>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-            <ShieldCheck size={24} />
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+            <ShieldCheck size={22} />
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Contaminated</p>
-            <h3 className="text-3xl font-bold text-red-600 mt-1">{contaminatedCount}</h3>
+            <p className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Contaminated</p>
+            <h3 className="text-2xl sm:text-3xl font-bold text-red-600 mt-1">{contaminatedCount}</h3>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-red-50 text-red-600 flex items-center justify-center">
-            <AlertTriangle size={24} />
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-red-50 text-red-600 flex items-center justify-center shrink-0">
+            <AlertTriangle size={22} />
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">System Users</p>
-            <h3 className="text-3xl font-bold text-blue-600 mt-1">{users.length}</h3>
+            <p className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">System Users</p>
+            <h3 className="text-2xl sm:text-3xl font-bold text-blue-600 mt-1">{users.length}</h3>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-            <Users size={24} />
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+            <Users size={22} />
           </div>
         </div>
       </div>
@@ -154,9 +154,9 @@ const Dashboard = () => {
                 ) : (
                   locations.slice(0, 6).map((l) => (
                     <tr key={l.id} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="py-3.5 px-4 font-bold text-slate-900">{l.name}</td>
-                      <td className="py-3.5 px-4 text-slate-600">Brgy. {l.barangay}</td>
-                      <td className="py-3.5 px-4 text-slate-600 capitalize">{l.source_type?.replace(/_/g, " ") || "Well"}</td>
+                      <td className="py-3.5 px-4 font-bold text-slate-900 max-w-[160px] sm:max-w-xs truncate" title={l.name}>{l.name}</td>
+                      <td className="py-3.5 px-4 text-slate-600 max-w-[120px] truncate" title={`Brgy. ${l.barangay}`}>Brgy. {l.barangay}</td>
+                      <td className="py-3.5 px-4 text-slate-600 capitalize max-w-[120px] truncate" title={l.source_type?.replace(/_/g, " ") || "Well"}>{l.source_type?.replace(/_/g, " ") || "Well"}</td>
                       <td className="py-3.5 px-4">
                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                           l.status === "safe" ? "bg-emerald-100 text-emerald-800" : l.status === "warning" ? "bg-amber-100 text-amber-800" : "bg-red-100 text-red-800"

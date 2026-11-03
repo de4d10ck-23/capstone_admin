@@ -441,18 +441,18 @@ const ForecastConfig = () => {
   return (
     <div className="max-w-6xl space-y-8 animate-fade-in font-sans pb-16">
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
               Machine Learning & Spatial Risk Controls
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 uppercase tracking-wider">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 uppercase tracking-wider whitespace-nowrap">
               Random Forest + study hazards
             </span>
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            Configure risk-index cutoffs, review study-map hazard weights, and trigger barangay surveillance alerts.
+            Configure risk-index cutoffs, scheduler interval, and trigger barangay surveillance alerts.
           </p>
         </div>
       </div>
@@ -472,27 +472,14 @@ const ForecastConfig = () => {
         </div>
       )}
 
-      {modelStatus?.hazard_weights && <div className="bg-white rounded-3xl p-6 border border-slate-200 space-y-3">
-        <h2 className="text-base font-bold text-slate-900">Study-map hazard weights</h2>
-        <p className="text-xs text-slate-600">Provisional weights adjust the existing model baseline. They are not calibrated contamination probabilities. Nearby sources use distance decay within the same barangay; estimated icon-fill zones receive reduced weight.</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-          {Object.entries(modelStatus.hazard_weights.natural).map(([code, weight]) => <p key={code}>
-            {{ F: 'Flood susceptible', HL: 'High landslide', ML: 'Moderate landslide', LL: 'Low landslide', OUT: 'Outside assessed zones (unknown)' }[code] || code}: <strong>{weight}</strong>
-          </p>)}
-          {Object.entries(modelStatus.hazard_weights.sources).map(([category, rule]) => <p key={category}>
-            {{ livestock: 'Poultry & livestock', sanitation: 'Septic tanks & sanitation', agriculture: 'Agriculture', waste: 'Waste & wastewater', waterways: 'Waterways & drainage', other: 'Other / unclassified' }[category] || category}: <strong>{rule.weight}</strong> (within {rule.radius_m} m)
-          </p>)}
-        </div>
-      </div>}
-
       {/* SECTION: BACKGROUND MODEL RUN INTERVAL */}
-      <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-sm space-y-6">
+      <div className="bg-white rounded-3xl p-4 sm:p-6 md:p-8 border border-slate-200/80 shadow-sm space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center">
+          <div className="flex items-start sm:items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0">
               <Clock size={22} />
             </div>
-            <div>
+            <div className="min-w-0 flex-1">
               <h2 className="text-base font-bold text-slate-900">Background Model Run Interval</h2>
               <p className="text-xs text-slate-500">
                 Set how many minutes the engine waits before automatically re-running the Random Forest model and refreshing the heatmaps.
@@ -500,14 +487,14 @@ const ForecastConfig = () => {
               </p>
             </div>
           </div>
-          <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-sky-800 bg-sky-50 border border-sky-100 px-3 py-1 rounded-full">
+          <span className="self-start sm:self-auto inline-flex items-center gap-1.5 text-[11px] font-semibold text-sky-800 bg-sky-50 border border-sky-100 px-3 py-1 rounded-full whitespace-nowrap">
             <span className={`w-2 h-2 rounded-full ${schedule?.is_running ? "bg-emerald-500 animate-pulse" : "bg-slate-400"}`} />
             Every {formatInterval(schedule?.run_interval_minutes ?? 60)}
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+          <div className="p-3.5 sm:p-4 rounded-2xl bg-slate-50 border border-slate-200">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Next Run In</span>
             <p className="text-2xl font-black text-slate-900 mt-1 font-mono tabular-nums">
               {schedule?.is_updating ? "Running..." : countdownLabel}
@@ -516,7 +503,7 @@ const ForecastConfig = () => {
               {schedule?.next_run ? `at ${new Date(schedule.next_run).toLocaleTimeString("en-PH", { timeZone: "Asia/Manila" })} PHT` : "Waiting for first run"}
             </p>
           </div>
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+          <div className="p-3.5 sm:p-4 rounded-2xl bg-slate-50 border border-slate-200">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Last Run</span>
             <p className="text-sm font-bold text-slate-900 mt-2">
               {schedule?.last_updated ? `${new Date(schedule.last_updated).toLocaleString("en-PH", { timeZone: "Asia/Manila" })} PHT` : "—"}
@@ -524,13 +511,13 @@ const ForecastConfig = () => {
           </div>
         </div>
 
-        <div className="bg-slate-50/80 p-5 rounded-2xl border border-slate-100 space-y-4">
-          <div className="flex flex-col md:flex-row md:items-end gap-4">
+        <div className="bg-slate-50/80 p-4 sm:p-5 rounded-2xl border border-slate-100 space-y-4">
+          <div className="flex flex-col md:flex-row md:items-end gap-3 sm:gap-4">
             <div className="space-y-1.5">
               <label htmlFor="run-interval-input" className="text-xs font-bold uppercase tracking-wider text-slate-700">
                 Re-run Every (Minutes)
               </label>
-              <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-xl border border-slate-200 focus-within:border-sky-500 w-40">
+              <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-xl border border-slate-200 focus-within:border-sky-500 w-full sm:w-40">
                 <input
                   id="run-interval-input"
                   type="number"
@@ -545,14 +532,14 @@ const ForecastConfig = () => {
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-2 flex-1">
+            <div className="flex flex-wrap gap-1.5 sm:gap-2 flex-1">
               {[5, 15, 30, 60, 120, 360, 720, 1440].map((m) => (
                 <button
                   key={m}
                   type="button"
                   id={`interval-preset-${m}`}
                   onClick={() => setIntervalInput(m)}
-                  className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold border transition-all cursor-pointer ${
+                  className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] font-semibold border transition-all cursor-pointer whitespace-nowrap ${
                     Number(intervalInput) === m
                       ? "bg-sky-600 text-white border-sky-600 shadow-sm"
                       : "bg-white text-slate-600 border-slate-200 hover:border-sky-300 hover:text-sky-700"
@@ -568,7 +555,7 @@ const ForecastConfig = () => {
               id="save-run-interval"
               onClick={handleSaveInterval}
               disabled={savingInterval || Number(intervalInput) === schedule?.run_interval_minutes}
-              className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs transition-all shadow-sm hover:shadow disabled:opacity-50 cursor-pointer"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs transition-all shadow-sm hover:shadow disabled:opacity-50 cursor-pointer whitespace-nowrap"
             >
               <Save size={15} />
               <span>{savingInterval ? "Saving..." : "Save Interval"}</span>
@@ -581,35 +568,35 @@ const ForecastConfig = () => {
       </div>
 
       {/* SECTION 1: PROBABILITY THRESHOLD CONTROLLER (USER FOCUS) */}
-      <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-sm space-y-6">
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+      <div className="bg-white rounded-3xl p-4 sm:p-6 md:p-8 border border-slate-200/80 shadow-sm space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-4 border-b border-slate-100">
+          <div className="flex items-start sm:items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
               <Gauge size={22} />
             </div>
-            <div>
+            <div className="min-w-0 flex-1">
               <h2 className="text-base font-bold text-slate-900">Environmental Risk Index Cutoffs</h2>
               <p className="text-xs text-slate-500">
                 Set score boundaries for low, moderate, and high estimated risk. These are not water-test classifications
               </p>
             </div>
           </div>
-          <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+          <span className="self-start sm:self-auto text-[11px] font-semibold text-slate-500 bg-slate-100 px-3 py-1 rounded-full whitespace-nowrap">
             Active Cutoffs: {lowPct}% / {highPct}%
           </span>
         </div>
 
         {/* Dynamic Interactive Visual Spectrum Bar */}
         <div className="space-y-2 pt-2">
-          <div className="flex justify-between text-[11px] font-semibold text-slate-600">
-            <span className="flex items-center gap-1 text-emerald-700">
-              <ShieldCheck size={14} /> Safe (0% – {lowPct}%)
+          <div className="flex flex-wrap justify-between gap-1 text-[10px] sm:text-[11px] font-semibold text-slate-600">
+            <span className="flex items-center gap-1 text-emerald-700 whitespace-nowrap">
+              <ShieldCheck size={14} className="shrink-0" /> Safe (0% – {lowPct}%)
             </span>
-            <span className="flex items-center gap-1 text-amber-700">
-              <AlertTriangle size={14} /> At Risk / Medium ({lowPct}% – {highPct}%)
+            <span className="flex items-center gap-1 text-amber-700 whitespace-nowrap">
+              <AlertTriangle size={14} className="shrink-0" /> Warning ({lowPct}% – {highPct}%)
             </span>
-            <span className="flex items-center gap-1 text-rose-700">
-              <ShieldAlert size={14} /> High Risk ({highPct}% – 100%)
+            <span className="flex items-center gap-1 text-rose-700 whitespace-nowrap">
+              <ShieldAlert size={14} className="shrink-0" /> High Risk ({highPct}% – 100%)
             </span>
           </div>
 
@@ -734,41 +721,41 @@ const ForecastConfig = () => {
       </div>
 
       {/* SECTION 4: ON-DEMAND BARANGAY ML SURVEILLANCE & RESIDENT ALERT DISPATCH */}
-      <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-sm space-y-6">
+      <div className="bg-white rounded-3xl p-4 sm:p-6 md:p-8 border border-slate-200/80 shadow-sm space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
               <Radio size={22} className={runningSurveillance ? "animate-pulse" : ""} />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-base font-bold text-slate-900">
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-base font-bold text-slate-900 leading-snug">
                   On-Demand Barangay ML Surveillance & Resident Alert Dispatcher
                 </h2>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-800 uppercase tracking-wider">
-                  Manual Bypass Test
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-800 uppercase tracking-wider whitespace-nowrap">
+                  Manual Bypass
                 </span>
               </div>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Execute live Random Forest predictive risk modeling on a specific barangay or citywide. If any water source is classified <strong>High Risk</strong>, automatically dispatch official public health advisories and Web Push notifications to registered residents without waiting for the {formatInterval(schedule?.run_interval_minutes ?? 60)} background engine. <em>(Warning sources do not push notify; limit 1 push per source/day).</em>
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                Execute live Random Forest predictive risk modeling on a specific barangay or citywide. If any water source is classified <strong>High Risk</strong>, automatically dispatch official public health advisories and Web Push notifications to registered residents without waiting for the {formatInterval(schedule?.run_interval_minutes ?? 60)} background engine. <em className="block sm:inline mt-0.5 sm:mt-0 text-[11px] text-slate-400 sm:text-slate-500">(Warning sources do not push notify; limit 1 push per source/day).</em>
               </p>
             </div>
           </div>
         </div>
 
         {/* Scan Configuration Form */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end bg-slate-50/70 p-5 rounded-2xl border border-slate-100">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end bg-slate-50/70 p-4 sm:p-5 rounded-2xl border border-slate-100">
           <div className="md:col-span-5 space-y-1.5">
-            <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
+            <label className="text-xs font-bold text-slate-700 flex flex-wrap items-center justify-between gap-1">
               <span>Target Barangay Jurisdiction:</span>
-              <span className="text-[10px] font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-100">
+              <span className="text-[10px] font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-100 whitespace-nowrap">
                 {barangaysWithSources.length} Monitored Barangays
               </span>
             </label>
             <select
               value={surveillanceBarangay}
               onChange={(e) => setSurveillanceBarangay(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 font-medium focus:outline-none focus:border-rose-500 shadow-2xs"
+              className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 font-medium focus:outline-none focus:border-rose-500 shadow-2xs truncate"
             >
               <option value="all">
                 🌐 All Barangays ({barangaysWithSources.length} Barangays, {stations.length} Monitored Sources)
@@ -785,19 +772,19 @@ const ForecastConfig = () => {
             </select>
           </div>
 
-          <div className="md:col-span-4 flex flex-col justify-center h-full pt-4 md:pt-0 space-y-2">
+          <div className="md:col-span-4 flex flex-col justify-center h-full pt-1 md:pt-0 space-y-2">
             <label className="relative flex items-start gap-2.5 cursor-pointer select-none">
               <input
                 type="checkbox"
                 checked={notifyResidentsOnFlag}
                 onChange={(e) => setNotifyResidentsOnFlag(e.target.checked)}
-                className="mt-0.5 w-4 h-4 rounded text-rose-600 focus:ring-rose-500 border-slate-300"
+                className="mt-0.5 w-4 h-4 rounded text-rose-600 focus:ring-rose-500 border-slate-300 shrink-0"
               />
-              <div>
+              <div className="min-w-0 flex-1">
                 <span className="text-xs font-bold text-slate-800 block">
                   Broadcast Push Notification to Residents
                 </span>
-                <span className="text-[10px] text-slate-500 block leading-tight">
+                <span className="text-[10px] text-slate-500 block leading-tight mt-0.5">
                   Only triggers for High Risk sources (Safe/Warning are not pushed)
                 </span>
               </div>
@@ -809,9 +796,9 @@ const ForecastConfig = () => {
                   type="checkbox"
                   checked={bypassDailyLimit}
                   onChange={(e) => setBypassDailyLimit(e.target.checked)}
-                  className="w-3.5 h-3.5 rounded text-amber-600 focus:ring-amber-500 border-slate-300"
+                  className="w-3.5 h-3.5 rounded text-amber-600 focus:ring-amber-500 border-slate-300 shrink-0"
                 />
-                <span>Bypass 1-push-per-day limit (Test Mode)</span>
+                <span className="truncate">Bypass 1-push-per-day limit (Test Mode)</span>
               </label>
             )}
           </div>
@@ -820,16 +807,16 @@ const ForecastConfig = () => {
             <button
               onClick={handleRunSurveillance}
               disabled={runningSurveillance}
-              className="w-full inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700 text-white font-semibold text-xs shadow-md hover:shadow-lg transition-all disabled:opacity-60 cursor-pointer"
+              className="w-full inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700 text-white font-semibold text-xs shadow-md hover:shadow-lg transition-all disabled:opacity-60 cursor-pointer whitespace-nowrap"
             >
               {runningSurveillance ? (
                 <>
-                  <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin shrink-0" />
                   <span>Scanning & Alerting...</span>
                 </>
               ) : (
                 <>
-                  <BellRing size={15} />
+                  <BellRing size={15} className="shrink-0" />
                   <span>Run Surveillance & Alert</span>
                 </>
               )}
@@ -983,16 +970,16 @@ const ForecastConfig = () => {
                           key={stId}
                           className="p-4 rounded-2xl border border-slate-200/90 bg-white hover:border-slate-300 transition-all shadow-2xs space-y-2.5"
                         >
-                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                            <div className="flex items-center gap-2.5">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 min-w-0">
+                            <div className="flex items-center gap-2.5 min-w-0 flex-1">
                               <div
                                 className={`w-3 h-3 rounded-full shrink-0 ${
                                   isCritical ? "bg-rose-500 animate-pulse" : "bg-amber-500"
                                 }`}
                               />
-                              <div>
-                                <h5 className="text-xs font-bold text-slate-900">{stName}</h5>
-                                <span className="text-[11px] text-slate-500">Barangay {station.barangay}</span>
+                              <div className="min-w-0 flex-1">
+                                <h5 className="text-xs font-bold text-slate-900 truncate" title={stName}>{stName}</h5>
+                                <span className="text-[11px] text-slate-500 block truncate">Barangay {station.barangay}</span>
                               </div>
                             </div>
 

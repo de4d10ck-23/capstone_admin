@@ -104,7 +104,7 @@ const Notifications = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Broadcast Composer */}
-        <div className="lg:col-span-6 bg-white rounded-3xl p-8 border border-slate-200/80 shadow-sm space-y-6">
+        <div className="lg:col-span-6 bg-white rounded-3xl p-5 sm:p-8 border border-slate-200/80 shadow-sm space-y-6">
           <div className="flex items-center gap-2">
             <Radio size={20} className="text-blue-600" />
             <h2 className="text-base font-bold text-slate-900">Compose New Broadcast Alert</h2>
@@ -199,7 +199,7 @@ const Notifications = () => {
         </div>
 
         {/* History Stream */}
-        <div className="lg:col-span-6 bg-white rounded-3xl p-8 border border-slate-200/80 shadow-sm space-y-4">
+        <div className="lg:col-span-6 bg-white rounded-3xl p-5 sm:p-8 border border-slate-200/80 shadow-sm space-y-4">
           <div className="flex items-center gap-2">
             <Bell size={20} className="text-blue-600" />
             <h2 className="text-base font-bold text-slate-900">Broadcast History ({notifications.length})</h2>
@@ -228,9 +228,9 @@ const Notifications = () => {
                         : "bg-blue-50/60 border-blue-200"
                     }`}
                   >
-                    <div className="flex justify-between items-start">
-                      <div className="flex items-center gap-2">
-                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${
+                    <div className="flex justify-between items-start gap-2 min-w-0">
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider flex-shrink-0 ${
                           isCritical
                             ? "bg-red-200 text-red-900"
                             : isWarning
@@ -239,13 +239,13 @@ const Notifications = () => {
                         }`}>
                           {n.type || "Notice"}
                         </span>
-                        <h4 className="font-bold text-xs text-slate-900">{n.title}</h4>
+                        <h4 className="font-bold text-xs text-slate-900 truncate" title={n.title}>{n.title}</h4>
                       </div>
-                      <span className="text-[10px] text-slate-400">
+                      <span className="text-[10px] text-slate-400 flex-shrink-0">
                         {n.created_at ? new Date(n.created_at).toLocaleDateString() : "Recent"}
                       </span>
                     </div>
-                    <p className="text-xs text-slate-600 mt-2">{n.message}</p>
+                    <p className="text-xs text-slate-600 mt-2 line-clamp-2 break-words" title={n.message}>{n.message}</p>
                     <div className="mt-2.5 pt-2 border-t border-slate-200/50 flex justify-between text-[10px] text-slate-500 font-medium">
                       <span>Coverage: {n.barangay ? `Brgy. ${n.barangay}` : "All Barangays"}</span>
                       <span className="capitalize">Target: {n.target_roles?.join(", ") || "Public"}</span>

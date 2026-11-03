@@ -119,12 +119,12 @@ const Layout = () => {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <header className="h-16 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 sm:px-8 flex items-center justify-between flex-shrink-0 z-10">
-          <div className="flex items-center gap-3">
+        <header className="h-16 bg-white/95 backdrop-blur-md border-b border-slate-200 px-3 sm:px-8 flex items-center justify-between gap-2 flex-shrink-0 z-10">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
             {/* Hamburger Button on Mobile */}
             <button
               onClick={() => setMobileOpen(true)}
-              className="lg:hidden p-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100"
+              className="lg:hidden p-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 flex-shrink-0"
               aria-label="Open Navigation Menu"
             >
               <Menu size={20} />
@@ -132,15 +132,15 @@ const Layout = () => {
             <span className="text-xs sm:text-sm font-semibold text-slate-700 truncate">Central Monitoring System</span>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-4">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+          <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+            <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0 whitespace-nowrap">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               <span>FastAPI Online</span>
             </span>
           </div>
         </header>
         
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden p-3.5 sm:p-6 lg:p-8">
           <Outlet />
         </main>
       </div>

@@ -303,7 +303,7 @@ const WaterSources = () => {
             {archiveLoading ? <tr><td colSpan={5} className="p-8 text-center text-slate-500">Loading archive...</td></tr>
               : archivedSources.length === 0 ? <tr><td colSpan={5} className="p-8 text-center text-slate-500">No archived stations.</td></tr>
               : archivedSources.map((source) => <tr key={source.id}>
-                <td className="px-6 py-4 font-semibold text-slate-900">{source.full_name || source.name}</td><td className="px-6 py-4 text-slate-600">Brgy. {source.barangay}</td>
+                <td className="px-6 py-4 font-semibold text-slate-900 max-w-[160px] sm:max-w-xs truncate" title={source.full_name || source.name}>{source.full_name || source.name}</td><td className="px-6 py-4 text-slate-600">Brgy. {source.barangay}</td>
                 <td className="px-6 py-4 capitalize text-slate-600">{source.status || "Unknown"}</td>
                 <td className="px-6 py-4 text-slate-600">{source.archived_at ? new Date(source.archived_at).toLocaleString("en-PH", { timeZone: "Asia/Manila" }) : ""}<span className="block text-slate-400">{source.archived_by_name || "Staff"}</span></td>
                 <td className="px-6 py-4 text-right"><button type="button" disabled={Boolean(archiveBusy)} onClick={() => handleRestore(source.id)} className="inline-flex items-center gap-1.5 rounded-full bg-blue-900 text-white px-3 py-2 font-semibold disabled:opacity-50"><ArchiveRestore size={14} />{archiveBusy === source.id ? "Restoring..." : "Restore"}</button></td>
@@ -352,9 +352,9 @@ const WaterSources = () => {
 
                   return (
                     <tr key={s.id} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="py-4 px-6 font-bold text-slate-900">{s.name}</td>
-                      <td className="py-4 px-6 text-slate-700 font-medium">Brgy. {s.barangay}</td>
-                      <td className="py-4 px-6 text-slate-600 capitalize">{s.source_type?.replace(/_/g, " ") || "Unknown"}</td>
+                      <td className="py-4 px-6 font-bold text-slate-900 max-w-[160px] sm:max-w-xs truncate" title={s.name}>{s.name}</td>
+                      <td className="py-4 px-6 text-slate-700 font-medium max-w-[130px] truncate" title={`Brgy. ${s.barangay}`}>Brgy. {s.barangay}</td>
+                      <td className="py-4 px-6 text-slate-600 capitalize max-w-[130px] truncate" title={s.source_type?.replace(/_/g, " ") || "Unknown"}>{s.source_type?.replace(/_/g, " ") || "Unknown"}</td>
                       <td className="py-4 px-6">
                         <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                           isSafe 
