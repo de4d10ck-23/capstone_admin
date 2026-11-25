@@ -8,6 +8,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import UserManagement from './pages/UserManagement';
 import ForecastConfig from './pages/ForecastConfig';
+import ActivityLogs from './pages/ActivityLogs';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
             <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="users" element={<UserManagement />} />
+            <Route path="activity-logs" element={<ActivityLogs />} />
             <Route path="forecast-config" element={<ForecastConfig />} />
           </Route>
           

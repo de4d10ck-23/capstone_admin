@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
+  History,
   LayoutDashboard, 
   Users, 
   Settings, 
@@ -18,6 +19,7 @@ const Layout = () => {
   const navItems = [
     { to: "/dashboard", icon: <LayoutDashboard size={20} />, label: "Dashboard" },
     { to: "/users", icon: <Users size={20} />, label: "User Management" },
+    { to: "/activity-logs", icon: <History size={20} />, label: "Activity Logs" },
     { to: "/forecast-config", icon: <Settings size={20} />, label: "Forecast Config" },
   ];
 
