@@ -162,7 +162,7 @@ const Notifications = () => {
                 <option value="all">Everyone (Residents & Officials)</option>
                 <option value="resident">Residents Only</option>
                 <option value="barangay_official">Barangay Officials Only</option>
-                <option value="sanitization_inspector">Sanitization Inspectors Only</option>
+                <option value="sanitization_inspector">Sanitation Inspectors Only</option>
               </select>
             </div>
 
@@ -248,7 +248,7 @@ const Notifications = () => {
                     <p className="text-xs text-slate-600 mt-2 line-clamp-2 break-words" title={n.message}>{n.message}</p>
                     <div className="mt-2.5 pt-2 border-t border-slate-200/50 flex justify-between text-[10px] text-slate-500 font-medium">
                       <span>Coverage: {n.barangay ? `Brgy. ${n.barangay}` : "All Barangays"}</span>
-                      <span className="capitalize">Target: {n.target_roles?.join(", ") || "Public"}</span>
+                      <span className="capitalize">Target: {n.target_roles?.map((r) => r === "sanitization_inspector" ? "sanitation inspector" : r.replace(/_/g, " ")).join(", ") || "Public"}</span>
                     </div>
                   </div>
                 );

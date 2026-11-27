@@ -217,7 +217,7 @@ const UserManagement = () => {
             <option value="all">All Roles</option>
             <option value="admin">Administrator</option>
             <option value="city_health_officer">CHU - DOCTOR</option>
-            <option value="sanitization_inspector">Sanitization Inspector</option>
+            <option value="sanitization_inspector">Sanitation Inspector</option>
             <option value="barangay_official">Barangay Official</option>
             <option value="resident">Resident</option>
           </select>
@@ -267,7 +267,7 @@ const UserManagement = () => {
                       ? "bg-amber-100 text-amber-800"
                       : "bg-slate-100 text-slate-700"
                   }`}>
-                    {isRoleCHO ? "CHU - DOCTOR" : u.role?.replace(/_/g, " ")}
+                    {isRoleCHO ? "CHU - DOCTOR" : isRoleInspector ? "Sanitation Inspector" : u.role?.replace(/_/g, " ")}
                   </span>
                 </div>
 
@@ -355,7 +355,7 @@ const UserManagement = () => {
                             ? "bg-amber-100 text-amber-800"
                             : "bg-slate-100 text-slate-700"
                         }`}>
-                          {isRoleCHO ? "CHU - DOCTOR" : u.role?.replace(/_/g, " ")}
+                          {isRoleCHO ? "CHU - DOCTOR" : isRoleInspector ? "Sanitation Inspector" : u.role?.replace(/_/g, " ")}
                         </span>
                       </td>
                       <td className="py-4 px-6 text-slate-700 font-medium">
@@ -508,7 +508,7 @@ const UserManagement = () => {
                   >
                     <option value="admin">Administrator</option>
                     <option value="city_health_officer">CHU - DOCTOR</option>
-                    <option value="sanitization_inspector">Sanitization Inspector</option>
+                    <option value="sanitization_inspector">Sanitation Inspector</option>
                     <option value="barangay_official">Barangay Official</option>
                     <option value="resident">Resident</option>
                   </select>

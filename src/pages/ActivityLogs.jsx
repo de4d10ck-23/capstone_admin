@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 
 const emptyFilters = { username: '', actor_id: '', action: '', role: '', outcome: '', start: '', end: '' };
 const roles = ['admin', 'city_health_officer', 'sanitization_inspector', 'barangay_official', 'resident'];
-const label = (value) => value?.replaceAll('_', ' ') || '—';
+const label = (value) => value?.replaceAll('sanitization_inspector', 'sanitation_inspector').replaceAll('_', ' ') || '—';
 const date = (value) => new Date(value).toLocaleString();
 const inputClass = 'w-full mt-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm';
 

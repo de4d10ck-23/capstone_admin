@@ -126,7 +126,7 @@ const Dashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-base font-bold text-slate-900">Latest Water Stations Registered</h2>
-              <p className="text-xs text-slate-500">Live surveillance data from sanitization field inspectors</p>
+              <p className="text-xs text-slate-500">Live surveillance data from sanitation field inspectors</p>
             </div>
             <Link to="/water-sources" className="text-xs font-semibold text-blue-600 hover:text-blue-700">
               View All Registry →
