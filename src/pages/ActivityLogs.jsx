@@ -81,7 +81,7 @@ export default function ActivityLogs() {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-3"><History className="text-blue-600" />Activity Logs</h1>
-          <p className="mt-2 text-sm text-slate-500">Add, update, and delete activity across admin, staff, and resident accounts.</p>
+          <p className="mt-2 text-sm text-slate-500">Login, logout, add, update, and delete activity across admin, staff, and resident accounts.</p>
           <p className="mt-1 text-xs text-slate-500">Times shown in your local timezone. Records begin after audit logging is enabled.</p>
         </div>
         <button onClick={() => setRefresh((n) => n + 1)} disabled={loading} className="flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm disabled:opacity-50"><RefreshCw size={16} className={loading ? 'animate-spin' : ''} />Refresh</button>
@@ -92,7 +92,7 @@ export default function ActivityLogs() {
           {[['username', 'Username', 'Search verified username'], ['actor_id', 'User ID', 'Exact user ID']].map(([key, title, placeholder]) => (
             <label key={key} className="text-xs font-semibold text-slate-600">{title}<input className={inputClass} value={draft[key]} onChange={update(key)} placeholder={placeholder} maxLength={key === 'actor_id' ? 128 : 100} /></label>
           ))}
-          <label className="text-xs font-semibold text-slate-600">Action<select className={inputClass} value={draft.action} onChange={update('action')}><option value="">All actions</option><option value="add">Add</option><option value="update">Update</option><option value="delete">Delete</option></select></label>
+          <label className="text-xs font-semibold text-slate-600">Action<select className={inputClass} value={draft.action} onChange={update('action')}><option value="">All actions</option><option value="login">Login</option><option value="logout">Logout</option><option value="add">Add</option><option value="update">Update</option><option value="delete">Delete</option></select></label>
           <label className="text-xs font-semibold text-slate-600">Role<select className={inputClass} value={draft.role} onChange={update('role')}><option value="">All roles</option>{roles.map((role) => <option key={role} value={role}>{label(role)}</option>)}</select></label>
           <label className="text-xs font-semibold text-slate-600">Result<select className={inputClass} value={draft.outcome} onChange={update('outcome')}><option value="">All results</option><option value="success">Success</option><option value="denied">Denied</option><option value="failure">Failure</option></select></label>
           <label className="text-xs font-semibold text-slate-600">From<input type="datetime-local" className={inputClass} value={draft.start} onChange={update('start')} max={draft.end || undefined} /></label>
@@ -182,11 +182,6 @@ export default function ActivityLogs() {
               </dl>
             </section>
           ))}
-          {selected.attempted_username && <section className="space-y-2 rounded-xl border border-slate-200 p-4">
-            <h3 className="text-sm font-semibold">Sign-in attempt</h3>
-            <dl className="text-sm"><dt className="text-xs text-slate-500">Username entered at sign-in</dt><dd className="mt-1 break-all">{selected.attempted_username}</dd></dl>
-            <p className="text-xs leading-relaxed text-slate-500">This is the username typed into the sign-in form. It does not by itself verify who made the request. The User section above shows the account identified by the server, if available.</p>
-          </section>}
         </div>}
       </dialog>
     </div>
